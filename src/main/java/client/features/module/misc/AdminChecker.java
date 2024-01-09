@@ -33,6 +33,8 @@ public class AdminChecker extends Module {
     private final CFontRenderer font = Fonts.default18;
     private final TimeHelper timer2 = new TimeHelper();
     NumberSetting delay;
+
+    private final TimeHelper timer3 = new TimeHelper();
     private String adminname;
 
     public AdminChecker() {
@@ -49,7 +51,7 @@ public class AdminChecker extends Module {
 
     public void onEvent(Event<?> e) {
         if (e instanceof EventRender2D) {
-            if (!this.admins.isEmpty()) {
+            if (!this.admins.isEmpty() ) {
                 font.drawStringWithShadow("" + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("" + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);
             } else {
                 font.drawStringWithShadow("Admins: " + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("Admins: " + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);

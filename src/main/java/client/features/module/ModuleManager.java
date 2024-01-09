@@ -58,6 +58,8 @@ public class ModuleManager {
    modules.add(new DeadRemover());
    modules.add(new HitBoxes2());
    modules.add(new FastBreak2());
+   modules.add(new TPBreaker());
+   modules.add(new TPBreaker2());
 	}
 
 

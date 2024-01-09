@@ -39,7 +39,7 @@ public class FastBreak2 extends Module {
 
 
     public void init() {
-        mode = new ModeSetting("Mode ", "Packet", new String[]{"Potion", "Packet", "FastPacket"});
+        mode = new ModeSetting("Mode ", "Packet", new String[]{ "Packet", "FastPacket"});
         this.delay = new NumberSetting("Vanilla Delay", 100, 100, 1000, 100F);
         packetspeed = new NumberSetting("Packet Speed", 1.4, 1.0, 3.0, 0.1);
         this.speed = new NumberSetting("Potion Speed", 1, 0, 4, 1f);

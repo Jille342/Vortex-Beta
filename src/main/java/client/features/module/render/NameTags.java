@@ -108,7 +108,7 @@ public class NameTags extends Module {
 
 
         drawRect(-width - 2, -(mc.fontRendererObj.FONT_HEIGHT + 1), (float) width + 2.0f, 1.5f, 0x90000000);
-        ItemStack renderMainHand = player.getHeldItem().copy();
+        ItemStack renderMainHand = player.getHeldItem();
         if (this.showItems.enable) {
             GlStateManager.pushMatrix();
             int xOffset = -8;
@@ -121,7 +121,7 @@ public class NameTags extends Module {
             xOffset += 16;
             for (ItemStack stack : player.inventory.armorInventory) {
                 if (stack == null) continue;
-                ItemStack armourStack = stack.copy();
+                ItemStack armourStack = stack;
                 this.renderItemStack(armourStack, xOffset, -26);
                 xOffset += 16;
             }

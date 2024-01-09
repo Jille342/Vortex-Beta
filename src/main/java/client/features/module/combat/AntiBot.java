@@ -7,6 +7,7 @@ import client.event.listeners.EventPacket;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
 import client.setting.ModeSetting;
+import client.utils.ChatUtils;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,11 +20,16 @@ public final class AntiBot extends Module {
 super("AntiBot",0, Category.COMBAT);
     }
 ModeSetting mode;
+    Entity currentEntity;
+    Entity[] playerList;
+    int index;
+    boolean next;
+    double[] oldPos;
     public static List<EntityPlayer> invalid = new ArrayList<>();
     @Override
     public void init() {
         super.init();
-        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel","Mineplex", "Shotbow"});
+        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel","Mineplex", "Shotbow","Matrix"});
         addSetting(mode);
     }
     public void onEvent(Event<?> e) {
@@ -52,15 +58,49 @@ ModeSetting mode;
                         if(entity instanceof EntityPlayer) {
                             if(entity == mc.thePlayer)
                                 return;
-                            if (entity.ticksExisted < 10 || mc.thePlayer.getDistanceToEntity(entity)> 100*100 ||entity.getEntityId() >= 1000000000 || entity.getEntityId() <= -1 || mc.getNetHandler().getPlayerInfo(entity.getUniqueID()).getResponseTime() <= 0 || entity.rotationPitch > 90F || entity.rotationPitch < -90F) {
+                            if (entity.ticksExisted < 100 && isNoArmor((EntityPlayer) entity)) {
                                 mc.theWorld.removeEntity(entity);
-
+                                ChatUtils.printChat("[AntiBot] Remove " + currentEntity.getName());
                             }
 
 
                         }
-                        break;
+
                     }
+                    break;
+
+                case "Matrix":
+                    int j = 0;
+
+                    for (int i = 0; i < mc.theWorld.getLoadedEntityList().size(); i++) {
+                        if (mc.theWorld.getLoadedEntityList().get(i) instanceof EntityPlayer) {
+                            playerList[j++] = mc.theWorld.getLoadedEntityList().get(i);
+                        }
+                    }
+                    if (index > playerList.length - 1) {
+                        index = 0;
+                        return;
+                    }
+                    if (!next) {
+                        currentEntity = playerList[index];
+                        oldPos[0] = currentEntity.posX;
+                        oldPos[1] = currentEntity.posZ;
+                        next = true;
+                        return;
+                    }
+
+                    double xDiff = oldPos[0] - currentEntity.posX;
+                    double zDiff = oldPos[1] - currentEntity.posZ;
+                    double speed = Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 10; // Legit 6.753686890703971
+
+                    if (currentEntity != mc.thePlayer && speed > 6.9 && currentEntity.hurtResistantTime == 0 && currentEntity.posY > mc.thePlayer.posY - 1.5 && currentEntity.posY < mc.thePlayer.posY + 1.5 && mc.thePlayer.getDistanceToEntity(currentEntity) < 4.5) {
+                        mc.theWorld.removeEntity(currentEntity);
+                        ChatUtils.printChat("[AntiBot] Remove " + currentEntity.getName());
+                    }
+
+                    index++;
+                    next = false;
+                    break;
             }
         }
         if(e instanceof EventPacket) {
@@ -103,6 +143,14 @@ ModeSetting mode;
     }
     public static List<EntityPlayer> getInvalid() {
         return invalid;
+    }
+    private static boolean isNoArmor(final EntityPlayer entity) {
+        for (int i = 0; i < 4; ++i) {
+            if (entity.getEquipmentInSlot(i) != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

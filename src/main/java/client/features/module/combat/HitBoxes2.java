@@ -3,6 +3,7 @@ package client.features.module.combat;
 import client.event.Event;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
+import client.features.module.ModuleManager;
 import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
@@ -14,6 +15,7 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
 import java.util.ArrayList;
@@ -28,11 +30,12 @@ public class HitBoxes2 extends Module {
     BooleanSetting targetAnimalsSetting;
     BooleanSetting ignoreTeamsSetting;
     NumberSetting fov;
+    private static MovingObjectPosition mv;
     NumberSetting rangeSetting;
     BooleanSetting hurttime;
 
     ModeSetting sortmode;
-    NumberSetting size;
+    static NumberSetting size;
     public HitBoxes2() {
         super("HitBoxes2",0, Category.COMBAT);
     }
@@ -61,6 +64,66 @@ public class HitBoxes2 extends Module {
                 float expandValue = (float) size.getValue();
                }
         }
+    }
+
+    public static double exp(Entity entity) {
+        return size.getValue();
+    }
+    public void gmo(float partialTicks) {
+        if (mc.getRenderViewEntity() != null && mc.theWorld != null) {
+            mc.pointedEntity = null;
+            Entity pE = null;
+            double d0 = 3.0D;
+            mv = mc.getRenderViewEntity().rayTrace(d0, partialTicks);
+            double d2 = d0;
+            Vec3 vec3 = mc.getRenderViewEntity().getPositionEyes(partialTicks);
+            if (mv != null) {
+                d2 = mv.hitVec.distanceTo(vec3);
+            }
+
+            Vec3 vec4 = mc.getRenderViewEntity().getLook(partialTicks);
+            Vec3 vec5 = vec3.addVector(vec4.xCoord * d0, vec4.yCoord * d0, vec4.zCoord * d0);
+            Vec3 vec6 = null;
+            float f1 = 1.0F;
+            double d3 = d2;
+            if(!sortmode.getMode().equals("MaxTarget")) {
+                Entity entity = findTarget();
+                if (entity != null) {
+                    if (entity.canBeCollidedWith()) {
+                        float ex = (float) ((double) entity.getCollisionBorderSize() * exp(entity));
+                        AxisAlignedBB ax = entity.getEntityBoundingBox().expand(ex, ex, ex);
+                        MovingObjectPosition mop = ax.calculateIntercept(vec3, vec5);
+                        if (ax.isVecInside(vec3)) {
+                            if (0.0D < d3 || d3 == 0.0D) {
+                                pE = entity;
+                                vec6 = mop == null ? vec3 : mop.hitVec;
+                                d3 = 0.0D;
+                            }
+                        } else if (mop != null) {
+                            double d4 = vec3.distanceTo(mop.hitVec);
+                            if (d4 < d3 || d3 == 0.0D) {
+                                if (entity == mc.getRenderViewEntity().ridingEntity && !entity.canRiderInteract()) {
+                                    if (d3 == 0.0D) {
+                                        pE = entity;
+                                        vec6 = mop.hitVec;
+                                    }
+                                } else {
+                                    pE = entity;
+                                    vec6 = mop.hitVec;
+                                    d3 = d4;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (pE != null && (d3 < d2 || mv == null)) {
+                mv = new MovingObjectPosition(pE, vec6);
+                mc.pointedEntity = pE;
+                mc.objectMouseOver.entityHit = pE;
+            }
+        }
+
     }
 
     private EntityLivingBase findTarget() {

@@ -4,25 +4,14 @@ import client.event.Event;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
 import client.setting.BooleanSetting;
-import client.setting.KeyBindSetting;
 import client.setting.NumberSetting;
 import client.utils.PlayerHelper;
-import client.utils.ServerHelper;
 import client.utils.TimeHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockAir;
-import net.minecraft.block.BlockLiquid;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiChest;
-import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemSword;
 import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
 public class RightClicker  extends  Module{
     BooleanSetting blocksword;
