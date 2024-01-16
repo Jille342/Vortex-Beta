@@ -6,6 +6,7 @@ import client.event.listeners.EventRenderGUI;
 import client.features.module.Module;
 import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
+import client.ui.clicckgui2.ClickGui;
 import client.ui.gui.clickGUI.GuiClickGUI;
 import client.ui.theme.Theme;
 import org.lwjgl.input.Keyboard;
@@ -39,14 +40,14 @@ public class ClickGUI extends Module {
 	public void onEvent(Event<?> e) {
 		if(e instanceof EventRender2D) {
 			client.Client.themeManager.setTheme(theme.getMode());
-			mc.displayGuiScreen(new GuiClickGUI(0));
+			mc.displayGuiScreen(new ClickGui(0));
 		}
 		super.onEvent(e);
 	}
 
 	@Override
 	public void onEnable() {
-		mc.displayGuiScreen(new GuiClickGUI(0));
+		mc.displayGuiScreen(new ClickGui(0));
 		super.onEnable();
 	}
 }

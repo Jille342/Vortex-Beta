@@ -8,14 +8,13 @@ import client.setting.NumberSetting;
 import client.utils.PlayerHelper;
 import client.utils.TimeHelper;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemSword;
 import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
 
 public class RightClicker  extends  Module{
-    BooleanSetting blocksword;
-
     NumberSetting rightCPS;
 
     private boolean clicked;
@@ -31,16 +30,14 @@ public class RightClicker  extends  Module{
 
     public void init() {
         super.init();
-        this.blocksword = new BooleanSetting("Block Sword", false);
         this.rightCPS = new NumberSetting("Right CPS", 7, 0, 20, 1f);
- this.blocksonly = new BooleanSetting("Blocks Only", true);
-        addSetting(blocksword, rightCPS, blocksonly);
+        addSetting(rightCPS);
     }
 
 
     public void onEvent(Event<?> e) {
         if(e instanceof EventUpdate) {
-            if ( mc.gameSettings.keyBindUseItem.isKeyDown() && shouldClick(false)) {
+            if ( mc.gameSettings.keyBindUseItem.isKeyDown() && shouldClick()) {
                 doRightClick();
             }
             }
@@ -50,16 +47,8 @@ public class RightClicker  extends  Module{
         return (long) ((Math.random() * (1000 / (cps - 2) - 1000 / cps + 1)) + 1000 / cps);
     }
 
-    public boolean shouldClick(boolean left) {
+    public boolean shouldClick() {
         if (mc.isGamePaused() || !mc.inGameHasFocus) {
-            return false;
-        }
-        if(blocksonly.enable &&!(mc.thePlayer.getHeldItem().getItem()  instanceof ItemBlock ))
-        {
-            return false;
-        }
-        if(!blocksword.enable && mc.thePlayer.getHeldItem().getItem() instanceof ItemSword )
-        {
             return false;
         }
 

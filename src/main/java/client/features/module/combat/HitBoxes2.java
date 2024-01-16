@@ -1,6 +1,7 @@
 package client.features.module.combat;
 
 import client.event.Event;
+import client.event.listeners.EventRender2D;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
 import client.features.module.ModuleManager;
@@ -55,7 +56,7 @@ public class HitBoxes2 extends Module {
 
     }
     public void onEvent(Event<?> e) {
-        if (e instanceof EventUpdate) {
+        if (e instanceof EventRender2D) {
             setTag(sortmode.getMode());
             Entity entity = findTarget();
             if(entity != mc.thePlayer && entity != null){

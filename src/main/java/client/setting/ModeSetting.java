@@ -8,6 +8,7 @@ public class ModeSetting extends Setting {
 
 	public int index;
 	public List<String> modes;
+	public boolean expand;
 
 	public ModeSetting(String name, Supplier<Boolean> visibility, String defaultMode, String... modes) {
 		super(name, visibility, defaultMode);
@@ -22,7 +23,10 @@ public class ModeSetting extends Setting {
 		this.modes = Arrays.asList(modes);
 		index = this.modes.indexOf(defaultMode);
 	}
-	
+
+	public void setModes(String a) {
+		index = modes.indexOf(a);
+	}
 	public String getMode() {
 		return modes.get(index);
 	}

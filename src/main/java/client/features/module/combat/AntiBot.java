@@ -24,8 +24,7 @@ ModeSetting mode;
     Entity[] playerList;
     int index;
     boolean next;
-    double[] oldPos;
-    public static List<EntityPlayer> invalid = new ArrayList<>();
+       public static List<EntityPlayer> invalid = new ArrayList<>();
     @Override
     public void init() {
         super.init();
@@ -54,9 +53,9 @@ ModeSetting mode;
                     }
                     break;
                 case "Shotbow":
-                    for(Entity entity: mc.theWorld.getLoadedEntityList()) {
-                        if(entity instanceof EntityPlayer) {
-                            if(entity == mc.thePlayer)
+                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                        if (entity instanceof EntityPlayer) {
+                            if (entity == mc.thePlayer)
                                 return;
                             if (entity.ticksExisted < 100 && isNoArmor((EntityPlayer) entity)) {
                                 mc.theWorld.removeEntity(entity);
@@ -67,39 +66,6 @@ ModeSetting mode;
                         }
 
                     }
-                    break;
-
-                case "Matrix":
-                    int j = 0;
-
-                    for (int i = 0; i < mc.theWorld.getLoadedEntityList().size(); i++) {
-                        if (mc.theWorld.getLoadedEntityList().get(i) instanceof EntityPlayer) {
-                            playerList[j++] = mc.theWorld.getLoadedEntityList().get(i);
-                        }
-                    }
-                    if (index > playerList.length - 1) {
-                        index = 0;
-                        return;
-                    }
-                    if (!next) {
-                        currentEntity = playerList[index];
-                        oldPos[0] = currentEntity.posX;
-                        oldPos[1] = currentEntity.posZ;
-                        next = true;
-                        return;
-                    }
-
-                    double xDiff = oldPos[0] - currentEntity.posX;
-                    double zDiff = oldPos[1] - currentEntity.posZ;
-                    double speed = Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 10; // Legit 6.753686890703971
-
-                    if (currentEntity != mc.thePlayer && speed > 6.9 && currentEntity.hurtResistantTime == 0 && currentEntity.posY > mc.thePlayer.posY - 1.5 && currentEntity.posY < mc.thePlayer.posY + 1.5 && mc.thePlayer.getDistanceToEntity(currentEntity) < 4.5) {
-                        mc.theWorld.removeEntity(currentEntity);
-                        ChatUtils.printChat("[AntiBot] Remove " + currentEntity.getName());
-                    }
-
-                    index++;
-                    next = false;
                     break;
             }
         }

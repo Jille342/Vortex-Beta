@@ -10,7 +10,11 @@ import client.event.listeners.EventPacket;
 import client.event.listeners.EventRender2D;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
+import client.setting.ModeSetting;
 import client.setting.NumberSetting;
+import client.ui.notifications.Notification;
+import client.ui.notifications.NotificationManager;
+import client.ui.notifications.NotificationType;
 import client.utils.ChatUtils;
 import client.utils.ServerHelper;
 import client.utils.TimeHelper;
@@ -33,7 +37,7 @@ public class AdminChecker extends Module {
     private final CFontRenderer font = Fonts.default18;
     private final TimeHelper timer2 = new TimeHelper();
     NumberSetting delay;
-
+    ModeSetting checkMode;
     private final TimeHelper timer3 = new TimeHelper();
     private String adminname;
 
@@ -45,7 +49,9 @@ public class AdminChecker extends Module {
 
     public void init() {
         this.delay = new NumberSetting("Chat Delay", 1000, 1000, 5000, 1000F);
-        addSetting(delay); super.init();
+        checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
+
+        addSetting(delay, checkMode); super.init();
 
     }
 
@@ -54,18 +60,26 @@ public class AdminChecker extends Module {
             if (!this.admins.isEmpty() ) {
                 font.drawStringWithShadow("" + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("" + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);
             } else {
+
                 font.drawStringWithShadow("Admins: " + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("Admins: " + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);
             }
         }
         if (e instanceof EventUpdate) {
             if (this.timer.hasReached(5000.0F)) {
                 this.timer.reset();
-                mc.thePlayer.sendQueue.addToSendQueue(new C14PacketTabComplete("/vanishnopacket:vanish "));
-                mc.thePlayer.sendQueue.addToSendQueue(new C14PacketTabComplete("/rank "));
+                if(checkMode.getMode().equals("Rank")) {
+                    mc.thePlayer.sendQueue.addToSendQueue(new C14PacketTabComplete("/vanishnopacket:vanish "));
+                    mc.thePlayer.sendQueue.addToSendQueue(new C14PacketTabComplete("/rank "));
+                } else if (checkMode.getMode().equals("Tell")) {
+                    mc.thePlayer.sendQueue.addToSendQueue(new C14PacketTabComplete("/tell "));
+                }
+
             }
             setTag(String.valueOf(admins.size()));
             if (!this.admins.isEmpty()) {
                 displayAdmins();
+            } else{
+                NotificationManager.show(new Notification(NotificationType.WARNING, "No Admin INC", "0 admins", 1));
             }
         }
         if (e instanceof EventPacket) {
@@ -106,7 +120,7 @@ public class AdminChecker extends Module {
     }
 
     public void displayAdmins() {
-
+        NotificationManager.show(new Notification(NotificationType.WARNING, "Admin INC", String.valueOf(admins) , 1));
             if (timer2.hasReached(delay.value)) {
                 ChatUtils.printChat(String.valueOf("Admin INC " + admins + " " + admins.size()));
                 timer2.reset();

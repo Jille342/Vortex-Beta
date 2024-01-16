@@ -133,6 +133,18 @@ public final class RotationUtils implements MCUtil {
     public static float[] getRotationsEntity(EntityLivingBase entity) {
         return PlayerUtils.isOnHypixel() && PlayerUtils.isMoving() ? getRotations(entity.posX + MathUtils.randomNumber(0.03D, -0.03D), entity.posY + (double)entity.getEyeHeight() - 0.4D + MathUtils.randomNumber(0.07D, -0.07D), entity.posZ + MathUtils.randomNumber(0.03D, -0.03D)) : getRotations(entity.posX, entity.posY + (double)entity.getEyeHeight() - 0.4D, entity.posZ);
     }
+    public static float calculateYawChangeToDst(Entity entity) {
+        double diffX = entity.posX - mc.thePlayer.posX;
+        double diffZ = entity.posZ - mc.thePlayer.posZ;
+        double deg = Math.toDegrees(Math.atan(diffZ / diffX));
+        if (diffZ < 0.0 && diffX < 0.0) {
+            return (float) MathHelper.wrapAngleTo180_float((float) -(mc.thePlayer.rotationYaw - (90 + deg)));
+        } else if (diffZ < 0.0 && diffX > 0.0) {
+            return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - (-90 + deg)));
+        } else {
+            return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - Math.toDegrees(-Math.atan(diffX / diffZ))));
+        }
+    }
 
 
 

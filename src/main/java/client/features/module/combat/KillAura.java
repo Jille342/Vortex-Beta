@@ -48,7 +48,7 @@ public class KillAura extends Module {
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
         sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle"});
-        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles);
+        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting);
         super.init();
     }
 

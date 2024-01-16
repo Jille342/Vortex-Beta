@@ -1,6 +1,7 @@
 package client.features.module.combat;
 
 import client.event.Event;
+import client.event.listeners.EventRender2D;
 import client.event.listeners.EventTick;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
@@ -79,7 +80,7 @@ public class AimAssist extends Module {
 
     @Override
     public void onEvent(Event<?> e) {
-        if (e instanceof EventUpdate) {
+        if (e instanceof EventRender2D) {
             setTag(String.valueOf(sortmode.getMode() +" " +validated.size()));
             primary = findTarget();
             if (e.isPost() || primary == null || !canAssist()) {
@@ -169,6 +170,8 @@ public class AimAssist extends Module {
                 validated.sort((o1, o2) -> (int) (o1.getDistanceToEntity(mc.thePlayer) - o2.getDistanceToEntity(mc.thePlayer)));
                 break;
         }
+
+        this.validated.sort(Comparator.comparingInt(o -> o.hurtTime));
         return validated.get(0);
     }
 

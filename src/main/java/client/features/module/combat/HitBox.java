@@ -2,6 +2,7 @@ package client.features.module.combat;
 
 
 import client.event.Event;
+import client.event.listeners.EventRender2D;
 import client.event.listeners.EventTick;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
@@ -60,11 +61,11 @@ public class HitBox extends Module {
     }
 
     public void onEvent(Event<?> e) {
-        if (e instanceof EventUpdate) {
+        if (e instanceof EventRender2D) {
             setTag(sortmode.getMode());
             gmo(1);
         }
-        if (e instanceof EventTick) {
+        if (e instanceof EventRender2D) {
             if (mc.theWorld != null && mc.thePlayer != null) {
                 if (ModuleManager.getModulebyClass(AutoClicker.class).enable && mc.gameSettings.keyBindAttack.isKeyDown()) {
                     if (mv != null) {

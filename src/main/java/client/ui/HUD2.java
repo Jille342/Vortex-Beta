@@ -45,7 +45,7 @@ public class HUD2 {
                 color = Colors.rainbow((counter[0] * 15) * 7, 0.8f, 1.0f);
                 break;
             case "Pulsing":
-                color = TwoColoreffect(new Color(50, 50, 255), new Color(9, 9, 79), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();
+                color = TwoColoreffect(new Color(50, 200, 255), new Color(9, 9, 79), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();
                 break;
             case "Test":
                 color = TwoColoreffect(new Color(65, 179, 255), new Color(248, 54, 255), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();
@@ -113,7 +113,7 @@ public class HUD2 {
                         color = Colors.rainbow((counter[0] * 15) * 7, 0.8f, 1.0f);
                         break;
                     case "Pulsing":
-                        color = TwoColoreffect(new Color(50, 50, 255), new Color(9, 9, 79), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();
+                        color = TwoColoreffect(new Color(50, 200, 255), new Color(9, 9, 79), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();
                         break;
                     case "Test":
                         color = TwoColoreffect(new Color(65, 179, 255), new Color(248, 54, 255), Math.abs(System.currentTimeMillis() / 10L) / 100.0 + 3.0F * (counter[0] * 2.55) / 60).getRGB();

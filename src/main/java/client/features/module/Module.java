@@ -118,7 +118,8 @@ public class Module {
 	}
 	
 	public void init() {}
-	public void onEnable() {}
+	public void onEnable() {
+	}
 	public void onDisable() {}
 	public void onEvent(Event<?> e) {}
 	
@@ -127,11 +128,7 @@ public class Module {
 		MOVEMENT("Movement"),
 		MISC("Misc"),
 		PLAYER("Player"),
-		RENDER("Render"),
-		EXPLOIT("Exploit"),
-		WORLD("World"),
-		OTHER("Other");
-		
+		RENDER("Render");
 		public String name;
 		
 		Category(String name) {

@@ -1,185 +1,185 @@
 package client.features.module.combat;
 
-
 import client.event.Event;
-import client.event.listeners.EventTick;
+import client.event.listeners.EventMotion;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
-import client.features.module.ModuleManager;
 import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
 import client.utils.RotationUtils;
 import client.utils.ServerHelper;
-import com.ibm.icu.impl.BOCU;
+import client.utils.TimeHelper;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.network.play.client.C02PacketUseEntity;
+import net.minecraft.util.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.Random;
 
 public class LegitAura extends Module {
-    public LegitAura() {
-        super("LegitAura", 0,Category.COMBAT);
-    }
-    public  static NumberSetting size;
-    private static MovingObjectPosition mv;
-    private final List<EntityLivingBase> validated = new ArrayList<>();
+
+    NumberSetting CPS;
     BooleanSetting targetMonstersSetting;
     BooleanSetting targetAnimalsSetting;
     BooleanSetting ignoreTeamsSetting;
-    NumberSetting fov;
-    NumberSetting rangeSetting;
-    public static boolean isAttackable = false;
 
-    public  ModeSetting sortmode;
+    NumberSetting rangeSetting;
+    ModeSetting sortmode;
+    BooleanSetting targetInvisibles;
+    NumberSetting fov;
+    BooleanSetting hitThroughWalls;
+    BooleanSetting clickOnly;
+    BooleanSetting notAimingOnly;
+    public LegitAura() {
+        super("LegitAura", 0,	Category.COMBAT);
+    }
+
     @Override
-    public void init(){
-        super.init();
-        sortmode = new ModeSetting("SortMode", "Angle", new String[]{"Angle","Distance"});
-        size = new NumberSetting("HitBox", 0.08 , 0, 1,0.01F);
+    public void init() {
+        this.rangeSetting = new NumberSetting("Range", 3.0, 0, 4.2, 0.1);
         this.targetMonstersSetting = new BooleanSetting("Target Monsters", true);
+        this.targetInvisibles = new BooleanSetting("Target Invisibles", false);
         this.targetAnimalsSetting = new BooleanSetting("Target Animals", false);
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
-        this.rangeSetting = new NumberSetting("Range", 5.0, 1, 8.0, 0.1);
-        this.fov = new NumberSetting("FOV", 90.0D, 15.0D, 360.0D, 1.0D);
-        addSetting(rangeSetting,size, sortmode, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, fov);
-
+        this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
+        sortmode = new ModeSetting("SortMode", "Angle", new String[]{"Distance", "Angle"});
+        this.fov = new NumberSetting("FOV", 20D, 0D, 30D, 1.0D);
+        hitThroughWalls = new BooleanSetting("Hit Through Walls", false);
+        clickOnly = new BooleanSetting("Click Only", true);
+        notAimingOnly = new BooleanSetting("Not Aiming Only", true);
+        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,fov,hitThroughWalls,rangeSetting,clickOnly, notAimingOnly);
+        super.init();
     }
 
+    ArrayList<EntityLivingBase> targets = new ArrayList<EntityLivingBase>();
+    private final TimeHelper attackTimer = new TimeHelper();
+
+    @Override
     public void onEvent(Event<?> e) {
+
         if (e instanceof EventUpdate) {
-            setTag(sortmode.getMode());
-            gmo(1);
-        }
-        if(e instanceof EventTick) {
-            if(mc.theWorld != null &&   mc.thePlayer != null) {
-                if (ModuleManager.getModulebyClass(AutoClicker.class).enable && mc.gameSettings.keyBindAttack.isKeyDown()) {
-                    if (mv != null) {
-                        mc.objectMouseOver = mv;
-                    }
-                }
-            }
-        }
-    }
-    public static double exp(Entity entity) {
-        return ( ModuleManager.getModulebyClass(HitBox.class).isEnable() ) ? size.getValue() : 1.0D;
-    }
-    public void gmo(float partialTicks) {
-        if (mc.getRenderViewEntity() != null && mc.theWorld != null) {
-            mc.pointedEntity = null;
-            Entity pE = null;
-            double d0 = 3.0D;
-            mv = mc.getRenderViewEntity().rayTrace(d0, partialTicks);
-            double d2 = d0;
-            Vec3 vec3 = mc.getRenderViewEntity().getPositionEyes(partialTicks);
-            if (mv != null) {
-                d2 = mv.hitVec.distanceTo(vec3);
-            }
+            Entity target = findTarget();
 
-            Vec3 vec4 = mc.getRenderViewEntity().getLook(partialTicks);
-            Vec3 vec5 = vec3.addVector(vec4.xCoord * d0, vec4.yCoord * d0, vec4.zCoord * d0);
-            Vec3 vec6 = null;
-            float f1 = 1.0F;
-            double d3 = d2;
-            Entity entity = findTarget();
-            if(entity != null) {
-                if (entity.canBeCollidedWith()) {
-                    float ex = (float) ((double) entity.getCollisionBorderSize() * exp(entity));
-                    AxisAlignedBB ax = entity.getEntityBoundingBox().expand(ex, ex, ex);
-                    MovingObjectPosition mop = ax.calculateIntercept(vec3, vec5);
-                    if (ax.isVecInside(vec3)) {
-                        if (0.0D < d3 || d3 == 0.0D) {
-                            pE = entity;
-                            vec6 = mop == null ? vec3 : mop.hitVec;
-                            d3 = 0.0D;
-                        }
-                    } else if (mop != null) {
-                        double d4 = vec3.distanceTo(mop.hitVec);
-                        if (d4 < d3 || d3 == 0.0D) {
-                            if (entity == mc.getRenderViewEntity().ridingEntity && !entity.canRiderInteract()) {
-                                if (d3 == 0.0D) {
-                                    pE = entity;
-                                    vec6 = mop.hitVec;
-                                }
-                            } else {
-                                pE = entity;
-                                vec6 = mop.hitVec;
-                                d3 = d4;
+            float diff = RotationUtils.calculateYawChangeToDst(target);
+            if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
+
+                    setTag(sortmode.getMode() + " " + targets.size());
+                    if (e.isPre()) {
+
+
+                        if (!targets.isEmpty()) {
+                            if (attackTimer.hasReached(calculateTime((int) CPS.value)) && !target.isDead && target.isEntityAlive()) {
+                                mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                                mc.thePlayer.swingItem();
+                                attackTimer.reset();
                             }
+
+                            if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10)
+                                targets.remove(target);
                         }
                     }
-                }
-            }
+                    if (e instanceof EventMotion) {
+                        EventMotion event = (EventMotion) e;
+                        if (!targets.isEmpty()) {
+                            if (!(diff < -6 || diff > 6) && notAimingOnly.enable)
+                                return;
 
+                            if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target == null)
+                                return;
+                            float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                            event.setYaw(angles[0]);
+                            event.setPitch(angles[1]);
 
-            if (pE != null && (d3 < d2 || mv == null)) {
-                mv = new MovingObjectPosition(pE, vec6);
-                mc.pointedEntity = pE;
-                mc.objectMouseOver.entityHit = pE;
-                if(isAttackable) {
-                    mc.thePlayer.swingItem();
-                    mc.playerController.attackEntity(mc.thePlayer, pE);
-                }
+                        }
+                    }
+                    super.onEvent(e);
+
             }
         }
 
     }
-
     private EntityLivingBase findTarget() {
-        validated.clear();
-        float f1 = 1.0F;
-        double d0 = 3.0D;
-        Vec3 vec4 = mc.getRenderViewEntity().getLook(1);
-        for (Entity entity : mc.theWorld.getEntitiesWithinAABBExcludingEntity(mc.getRenderViewEntity(), mc.getRenderViewEntity().getEntityBoundingBox().addCoord(vec4.xCoord * d0, vec4.yCoord * d0, vec4.zCoord * d0).expand(f1, f1, f1))) {
+        targets.clear();
+
+        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
             if (entity instanceof EntityLivingBase && entity != mc.thePlayer) {
                 if (entity.isDead || !entity.isEntityAlive() || entity.ticksExisted < 10) {
                     continue;
                 }
+                if(clickOnly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
+                    continue;
+                if (entity.isInvisible() && !targetInvisibles.enable)
+                    continue;
 
                 if (!RotationUtils.fov(entity, fov.value))
                     continue;
-                double focusRange = mc.thePlayer.canEntityBeSeen(entity) ? rangeSetting.value : 3.5;
+                if(!mc.thePlayer.canEntityBeSeen(entity)&& !hitThroughWalls.isEnable())
+                    continue;
+                double focusRange = rangeSetting.value ;
                 if (mc.thePlayer.getDistanceToEntity(entity) > focusRange) continue;
                 if (entity instanceof EntityPlayer) {
 
                     if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
                         continue;
                     }
-                    if(  ((EntityPlayer) entity).getHealth() ==0)
-                        continue;
-                    validated.add((EntityLivingBase) entity);
+
+                    targets.add((EntityLivingBase) entity);
                 } else if (entity instanceof EntityAnimal && targetAnimalsSetting.enable) {
-                    if( ((EntityAnimal) entity).getHealth() ==0)
-                        continue;
-                    validated.add((EntityLivingBase) entity);
+                    targets.add((EntityLivingBase) entity);
                 } else if (entity instanceof EntityMob && targetMonstersSetting.enable) {
-                    if(((EntityMob) entity).getHealth() == 0)
-                        continue;
-                    validated.add((EntityLivingBase) entity);
+                    targets.add((EntityLivingBase) entity);
                 }
             }
         }
 
-        if (validated.isEmpty()) return null;
-        switch (sortmode.getMode()) {
-            case "Angle":
-                validated.sort(Comparator.comparingDouble(RotationUtils::getYawChangeToEntity));
-                break;
+        if (targets.isEmpty()) return null;
+        switch(sortmode.getMode()) {
             case "Distance":
-                validated.sort((o1, o2) -> (int) (o1.getDistanceToEntity(mc.thePlayer) - o2.getDistanceToEntity(mc.thePlayer)));
+                this.targets.sort(Comparator.comparingDouble((entity) -> (double)mc.thePlayer.getDistanceToEntity((Entity) entity)));
                 break;
+            case"Angle":
+                targets.sort(Comparator.comparingDouble(this::calculateYawChangeToDst));
         }
-        this.validated.sort(Comparator.comparingInt(o -> o.hurtTime));
+        this.targets.sort(Comparator.comparingInt(o -> o.hurtTime));
+        return (EntityLivingBase) targets.get(0);
+    }
 
-        return validated.get(0);
+    private long calculateTime(int cps) {
+        return (long) ((Math.random() * (1000 / (cps - 2) - 1000 / cps + 1)) + 1000 / cps);
+    }
+
+    public float calculateYawChangeToDst(Entity entity) {
+        double diffX = entity.posX - mc.thePlayer.posX;
+        double diffZ = entity.posZ - mc.thePlayer.posZ;
+        double deg = Math.toDegrees(Math.atan(diffZ / diffX));
+        if (diffZ < 0.0 && diffX < 0.0) {
+            return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - (90 + deg)));
+        } else if (diffZ < 0.0 && diffX > 0.0) {
+            return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - (-90 + deg)));
+        } else {
+            return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - Math.toDegrees(-Math.atan(diffX / diffZ))));
+        }
+    }
+
+    @Override
+    public void onEnable() {
+        targets.clear();
+        super.onEnable();
+    }
+
+    @Override
+    public void onDisable() {
+        targets.clear();
+        super.onDisable();
     }
 }

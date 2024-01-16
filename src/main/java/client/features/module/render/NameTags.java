@@ -214,7 +214,8 @@ public class NameTags extends Module {
 
     private void renderEnchantmentText(ItemStack stack, int x, int y) {
         int enchantmentY = y - 8;
-
+if(stack == null)
+    return;
         NBTTagList enchants = stack.getEnchantmentTagList();
         if(enchants ==null)
             return;

@@ -6,16 +6,14 @@ import client.event.listeners.EventMotion;
 import client.event.listeners.EventUpdate;
 import client.features.module.ModuleManager;
 import client.features.module.movement.NoSlowdown;
+import client.features.module.render.NoSwing;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.client.*;
 import net.minecraft.util.MovementInput;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -51,6 +49,8 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     @Shadow public MovementInput movementInput;
 
     @Shadow protected int sprintToggleTimer;
+
+    @Shadow @Final public NetHandlerPlayClient sendQueue;
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
     private void onUpdate(CallbackInfo ci) {
@@ -96,6 +96,13 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
               }
           }
         }
+    }
+    @Inject(method = "swingItem", at = @At(value =  "HEAD"), cancellable = true)
+    private void swingItem(CallbackInfo ci) {
+    if(ModuleManager.getModulebyClass(NoSwing.class).isEnable()) {
+        ci.cancel();
+sendQueue.addToSendQueue(new C0APacketAnimation());
+    }
     }
 
     public void sendMovePacket(EventMotion event) {
