@@ -101,7 +101,10 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     private void swingItem(CallbackInfo ci) {
     if(ModuleManager.getModulebyClass(NoSwing.class).isEnable()) {
         ci.cancel();
-sendQueue.addToSendQueue(new C0APacketAnimation());
+
+        if(!NoSwing.enableServerSide.isEnable()){
+            sendQueue.addToSendQueue(new C0APacketAnimation());
+        }
     }
     }
 
