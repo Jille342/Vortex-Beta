@@ -70,8 +70,9 @@ public class LegitAura extends Module {
         if (e instanceof EventUpdate) {
             Entity target = findTarget();
 
-            float diff = RotationUtils.calculateYawChangeToDst(target);
-            if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
+            if(target != null){
+                float diff = RotationUtils.calculateYawChangeToDst(target);
+                if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
 
                     setTag(sortmode.getMode() + " " + targets.size());
                     if (e.isPre()) {
@@ -103,7 +104,7 @@ public class LegitAura extends Module {
                         }
                     }
                     super.onEvent(e);
-
+                }
             }
         }
 
