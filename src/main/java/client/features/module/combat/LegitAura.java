@@ -53,7 +53,7 @@ public class LegitAura extends Module {
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
         sortmode = new ModeSetting("SortMode", "Angle", new String[]{"Distance", "Angle"});
-        this.fov = new NumberSetting("FOV", 20D, 0D, 30D, 1.0D);
+        this.fov = new NumberSetting("FOV", 20D, 0D, 360D, 1.0D);
         hitThroughWalls = new BooleanSetting("Hit Through Walls", false);
         clickOnly = new BooleanSetting("Click Only", true);
         notAimingOnly = new BooleanSetting("Not Aiming Only", true);
