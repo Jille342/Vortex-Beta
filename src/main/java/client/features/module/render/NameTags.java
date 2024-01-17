@@ -101,6 +101,7 @@ public class NameTags extends Module {
         GL11.glRotatef(-mc.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(mc.getRenderManager().playerViewX, mc.gameSettings.thirdPersonView == 2 ? -1.0f : 1.0f, 0.0f, 0.0f);
         GlStateManager.scale(-scale, -scale, scale);
+
         GL11.glDepthMask(false);
         GL11.glDisable(GL11.GL_LIGHTING);
 

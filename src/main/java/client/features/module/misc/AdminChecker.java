@@ -1,5 +1,6 @@
 package client.features.module.misc;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import client.event.listeners.EventPacket;
 import client.event.listeners.EventRender2D;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
+import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
 import client.ui.notifications.Notification;
@@ -22,11 +24,13 @@ import client.utils.font.CFontRenderer;
 import client.utils.font.Fonts;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C14PacketTabComplete;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.network.play.server.S3APacketTabComplete;
 import net.minecraft.util.BlockPos;
+import org.lwjgl.opengl.GL11;
 
 public class AdminChecker extends Module {
     private int lastAdmins;
@@ -34,10 +38,14 @@ public class AdminChecker extends Module {
     private final ArrayList<String> admins;
 
     private final TimeHelper timer;
-    private final CFontRenderer font = Fonts.default18;
+    private final CFontRenderer font = Fonts.elliot18;
+
     private final TimeHelper timer2 = new TimeHelper();
+    int color = -1;
     NumberSetting delay;
+    ModeSetting noticeMode;
     ModeSetting checkMode;
+    NumberSetting scaling;
     private final TimeHelper timer3 = new TimeHelper();
     private String adminname;
 
@@ -49,19 +57,31 @@ public class AdminChecker extends Module {
 
     public void init() {
         this.delay = new NumberSetting("Chat Delay", 1000, 1000, 5000, 1000F);
-        checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
-
-        addSetting(delay, checkMode); super.init();
+        this.checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
+        this.noticeMode = new ModeSetting("NoticeMode", "Display", new String[]{"Chat", "Display"});
+        this.scaling = new NumberSetting("Size", 1.0F,1.0, 4.0, 2.0);;
+        addSetting(delay, checkMode,noticeMode,scaling); super.init();
 
     }
 
     public void onEvent(Event<?> e) {
         if (e instanceof EventRender2D) {
-            if (!this.admins.isEmpty() ) {
-                font.drawStringWithShadow("" + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("" + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);
-            } else {
+            if(noticeMode.getMode().equals("Display")){
+                double scale = (0.0018 + (double) this.scaling.getValue());
+                if (!this.admins.isEmpty() ) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.scale(scale,scale,scale);
+                    color = TwoColoreffect(Color.RED,Color.WHITE,Math.abs(System.currentTimeMillis() / 2L) / 100.0 + 3.0F * (1 * 2.55) / 60).getRGB();
+                    font.drawStringWithShadow("Admin INC " + admins + " " + admins.size(), (3 / scale), 30 / scale, color);
+                    GlStateManager.popMatrix();
+                } else {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.scale(scale,scale,scale);
+                    color = Color.WHITE.getRGB();
+                    font.drawStringWithShadow("No Admins" + admins + " " + admins.size(), (3 / scale), 30 / scale, color);
+                    GlStateManager.popMatrix();
+                }
 
-                font.drawStringWithShadow("Admins: " + String.valueOf(this.admins.size()), ((new ScaledResolution(mc)).getScaledWidth() / 2 - mc.fontRendererObj.getStringWidth("Admins: " + String.valueOf(this.admins.size())) + 20), ((new ScaledResolution(mc)).getScaledHeight() / 2 + 20), -1);
             }
         }
         if (e instanceof EventUpdate) {
@@ -95,7 +115,7 @@ public class AdminChecker extends Module {
                         String admin = administrators[j];
                         if (user.equalsIgnoreCase(admin)) {
                             adminname = user;
-                       displayAdmins();
+                            displayAdmins();
                             this.admins.add(user);
                         }
                     }
@@ -119,13 +139,24 @@ public class AdminChecker extends Module {
         }
     }
 
+    public static Color TwoColoreffect(final Color color, final Color color2, double delay) {
+        if (delay > 1.0) {
+            final double n2 = delay % 1.0;
+            delay = (((int) delay % 2 == 0) ? n2 : (1.0 - n2));
+        }
+        final double n3 = 1.0 - delay;
+        return new Color((int) (color.getRed() * n3 + color2.getRed() * delay), (int) (color.getGreen() * n3 + color2.getGreen() * delay), (int) (color.getBlue() * n3 + color2.getBlue() * delay), (int) (color.getAlpha() * n3 + color2.getAlpha() * delay));
+    }
+
     public void displayAdmins() {
         NotificationManager.show(new Notification(NotificationType.WARNING, "Admin INC", String.valueOf(admins) , 1));
-            if (timer2.hasReached(delay.value)) {
+        if (timer2.hasReached(delay.value)) {
+            if(noticeMode.getMode().equals("Chat")) {
                 ChatUtils.printChat(String.valueOf("Admin INC " + admins + " " + admins.size()));
-                timer2.reset();
             }
+            timer2.reset();
         }
+    }
 
     public String[] getAdministrators() {
         return new String[] {
@@ -206,9 +237,6 @@ public class AdminChecker extends Module {
                 "Pyachi2002",
                 "ro_cks",
                 "BayanNoodle",
-
-
-
         };
     }
 
