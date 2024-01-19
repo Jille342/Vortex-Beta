@@ -40,6 +40,7 @@ public class LegitAura extends Module {
     BooleanSetting hitThroughWalls;
     BooleanSetting clickOnly;
     BooleanSetting notAimingOnly;
+    ModeSetting rotationmode;
     public LegitAura() {
         super("LegitAura", 0,	Category.COMBAT);
     }
@@ -53,11 +54,12 @@ public class LegitAura extends Module {
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
         sortmode = new ModeSetting("SortMode", "Angle", new String[]{"Distance", "Angle"});
+        rotationmode = new ModeSetting("Rotation Mode", "Normal", new String[]{"None", "Normal"});
         this.fov = new NumberSetting("FOV", 20D, 0D, 360D, 1.0D);
         hitThroughWalls = new BooleanSetting("Hit Through Walls", false);
         clickOnly = new BooleanSetting("Click Only", true);
         notAimingOnly = new BooleanSetting("Not Aiming Only", true);
-        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,fov,hitThroughWalls,rangeSetting,clickOnly, notAimingOnly);
+        addSetting(rotationmode,CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,fov,hitThroughWalls,rangeSetting,clickOnly, notAimingOnly);
         super.init();
     }
 
@@ -69,12 +71,11 @@ public class LegitAura extends Module {
 
         if (e instanceof EventUpdate) {
             Entity target = findTarget();
-
+            setTag(sortmode.getMode() + " " + targets.size());
             if(target != null){
                 float diff = RotationUtils.calculateYawChangeToDst(target);
                 if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
 
-                    setTag(sortmode.getMode() + " " + targets.size());
                     if (e.isPre()) {
 
 
@@ -97,9 +98,12 @@ public class LegitAura extends Module {
 
                             if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target == null)
                                 return;
-                            float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
-                            event.setYaw(angles[0]);
-                            event.setPitch(angles[1]);
+
+                            if(rotationmode.getMode().equals("Normal")) {
+                                float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                                event.setYaw(angles[0]);
+                                event.setPitch(angles[1]);
+                            }
 
                         }
                     }

@@ -46,7 +46,10 @@ public class AdminChecker extends Module {
     ModeSetting noticeMode;
     ModeSetting checkMode;
     NumberSetting scaling;
+    BooleanSetting sound;
+    NumberSetting soundlong;
     private final TimeHelper timer3 = new TimeHelper();
+    int i = 0;
     private String adminname;
 
     public AdminChecker() {
@@ -59,8 +62,10 @@ public class AdminChecker extends Module {
         this.delay = new NumberSetting("Chat Delay", 1000, 1000, 5000, 1000F);
         this.checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
         this.noticeMode = new ModeSetting("NoticeMode", "Display", new String[]{"Chat", "Display"});
+        this.sound = new BooleanSetting("Sound", true);
+        this.soundlong = new NumberSetting("Sound Long", 50,10,200,1);
         this.scaling = new NumberSetting("Size", 1.0F,1.0, 4.0, 2.0);;
-        addSetting(delay, checkMode,noticeMode,scaling); super.init();
+        addSetting(delay, checkMode,noticeMode,scaling, sound,soundlong); super.init();
 
     }
 
@@ -97,8 +102,16 @@ public class AdminChecker extends Module {
             }
             setTag(String.valueOf(admins.size()));
             if (!this.admins.isEmpty()) {
+                if(sound.enable) {
+                    i++;
+                    if (i < soundlong.getValue()) {
+                                mc.thePlayer.playSound("random.orb", 0.2F, 1.0F);
+
+                    }
+                }
                 displayAdmins();
             } else{
+                i = 0;
                 NotificationManager.show(new Notification(NotificationType.WARNING, "No Admin INC", "0 admins", 1));
             }
         }

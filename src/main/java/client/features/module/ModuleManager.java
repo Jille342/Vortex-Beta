@@ -65,6 +65,7 @@ public class ModuleManager {
    modules.add(new Notifications());
    modules.add(new NoSwing());
    modules.add(new LegitAura());
+   modules.add(new KillReporter());
 	}
 
 

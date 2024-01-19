@@ -13,7 +13,7 @@ public class NoSwing extends Module {
 
     @Override
     public void init(){
-        this.enableServerSide = new BooleanSetting("DisableServerSide", false);
+        enableServerSide = new BooleanSetting("DisableServerSide", false);
         addSetting(enableServerSide);
         super.init();
     }

@@ -33,6 +33,7 @@ public class TPBreaker2 extends Module {
     private double xPos, yPos, zPos, minx;
 
     ModeSetting mode;
+    NumberSetting radius1;
     public TPBreaker2() {
         super("TPBreaker2", 0, Category.PLAYER);
     }
@@ -45,7 +46,8 @@ public class TPBreaker2 extends Module {
 
     public void init() {
         mode = new ModeSetting("Mode", "RightClick", new String[]{ "Break", "RightClick"});
-        addSetting(mode);
+        this.radius1 = new NumberSetting("Radius", 5, 1, 10, 1f);
+        addSetting(mode, radius1);
         super.init();
 
     }
@@ -92,7 +94,7 @@ public class TPBreaker2 extends Module {
                     }
                 }
             }else if(mode.getMode().equals("RightClick")  && em.isPre()){
-                int radius = 5;
+                int radius = (int) radius1.getValue();
                 for(int x = -radius; x < radius; x++){
                     for(int y = radius; y > -radius; y--){
                         for(int z = -radius; z < radius; z++){
