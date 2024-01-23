@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityLivingBase.class)
-public abstract class MixinEntityLivingBase {
+public abstract class MixinEntityLivingBase extends MixinEntity {
 
     @Shadow protected abstract boolean isPlayer();
 

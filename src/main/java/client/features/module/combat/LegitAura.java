@@ -72,7 +72,7 @@ public class LegitAura extends Module {
         if (e instanceof EventUpdate) {
             Entity target = findTarget();
             setTag(sortmode.getMode() + " " + targets.size());
-            if(target != null){
+            if (target != null) {
                 float diff = RotationUtils.calculateYawChangeToDst(target);
                 if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
 
@@ -90,28 +90,34 @@ public class LegitAura extends Module {
                                 targets.remove(target);
                         }
                     }
-                    if (e instanceof EventMotion) {
-                        EventMotion event = (EventMotion) e;
-                        if (!targets.isEmpty()) {
-                            if (!(diff < -6 || diff > 6) && notAimingOnly.enable)
-                                return;
 
-                            if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target == null)
-                                return;
-
-                            if(rotationmode.getMode().equals("Normal")) {
-                                float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
-                                event.setYaw(angles[0]);
-                                event.setPitch(angles[1]);
-                            }
-
-                        }
-                    }
                     super.onEvent(e);
                 }
             }
         }
+        if (e instanceof EventMotion) {
 
+            Entity target = findTarget();
+            if (target != null) {
+                float diff = RotationUtils.calculateYawChangeToDst(target);
+                EventMotion event = (EventMotion) e;
+                if (!targets.isEmpty()) {
+                    if (!(diff < -6 || diff > 6) && notAimingOnly.enable)
+                        return;
+
+                    if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target == null)
+                        return;
+
+                    if (rotationmode.getMode().equals("Normal")) {
+                        float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                        event.setYaw(angles[0]);
+                        event.setPitch(angles[1]);
+                    }
+
+                }
+            }
+
+        }
     }
     private EntityLivingBase findTarget() {
         targets.clear();

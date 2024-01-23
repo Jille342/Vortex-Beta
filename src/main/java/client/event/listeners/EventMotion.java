@@ -9,7 +9,9 @@ public class EventMotion extends Event<EventMotion> {
 	public float yaw, pitch;
 	public boolean onGround;
 
-	private double lastX, lastY, lastZ;
+	private final double lastX;
+    private final double lastY;
+    private final double lastZ;
 	public float lastYaw, lastPitch;
 	public boolean lastOnGround;
 

@@ -139,6 +139,23 @@ public class MovementUtils {
 		}
 		return baseSpeed;
 	}
+	public static double InputX() {
+		if (!isMoving()) return 0;
+		float Forward = (mc.gameSettings.keyBindForward.isKeyDown()?1:0)-(mc.gameSettings.keyBindBack.isPressed()?1:0);
+		float Strafing = (mc.gameSettings.keyBindRight.isKeyDown()?1:0)-(mc.gameSettings.keyBindLeft.isPressed()?1:0);
+
+		double r = Math.atan2(Forward, Strafing)-1.57079633-toRadian(mc.thePlayer.rotationYaw);
+		return Math.sin(r);
+	}
+
+	public static double InputZ() {
+		if (!isMoving()) return 0;
+		float Forward = (mc.gameSettings.keyBindForward.isKeyDown()?1:0)-(mc.gameSettings.keyBindBack.isPressed()?1:0);
+		float Strafing = (mc.gameSettings.keyBindRight.isKeyDown()?1:0)-(mc.gameSettings.keyBindLeft.isPressed()?1:0);
+
+		double r = Math.atan2(Forward, Strafing)-1.57079633-toRadian(mc.thePlayer.rotationYaw);
+		return Math.cos(r);
+	}
 
 	public static double nextY(double y) {
 		return (y - .08D) * .9800000190734863D;

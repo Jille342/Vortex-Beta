@@ -14,8 +14,7 @@ import client.setting.KeyBindSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
 
-import client.ui.notifications.Notification;
-import client.ui.notifications.NotificationManager;
+import client.ui.notifications.NotificationPublisher;
 import client.ui.notifications.NotificationType;
 import net.minecraft.client.Minecraft;
 
@@ -66,6 +65,11 @@ public class ModuleManager {
    modules.add(new NoSwing());
    modules.add(new LegitAura());
    modules.add(new KillReporter());
+   modules.add(new Chams());
+   modules.add(new Freecam());
+   modules.add(new AntiObbyTrap());
+   modules.add(new HitBoxes3());
+   modules.add(new HitBoxes4());
 	}
 
 
@@ -85,9 +89,7 @@ public class ModuleManager {
 			for (Module module : modules) if (module.getKeyCode() == ((EventKey) e).getCode()) {
 				if (getModulebyClass(Notifications.class).isEnable()) {
 					if (!module.isEnable()) {
-						NotificationManager.show(new Notification(NotificationType.INFO, "Enabled", module.getName(), 1));
-					} else {
-						NotificationManager.show(new Notification(NotificationType.INFO, "Disabled", module.getName(), 1));
+						NotificationPublisher.queue("Enabled", module.getName() + " is now enabled", NotificationType.SUCCESS);					} else {
 					}
 				}
 					module.toggle();

@@ -8,22 +8,36 @@ import client.features.module.ModuleManager;
 import client.features.module.movement.NoSlowdown;
 import client.features.module.render.NoSwing;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockWall;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.*;
-import net.minecraft.util.MovementInput;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import scala.collection.parallel.ParIterableLike;
+
+import java.util.List;
+
+import static net.minecraft.network.play.client.C0BPacketEntityAction.Action.*;
 
 @Mixin(EntityPlayerSP.class)
 public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
@@ -59,22 +73,84 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
         Client.onEvent(e);
     }
 
-    @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
-    private void preCheckLightFor(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(false);
-    }
 
-    @Inject(method = "onUpdateWalkingPlayer", at = @At(value = "HEAD"), cancellable = true)
-    private void PreUpdateWalkingPlayer(CallbackInfo ci) {
+    @Inject(method = "onUpdateWalkingPlayer", at = @At("HEAD"), cancellable = true)
+    private void onUpdateWalkingPlayer(CallbackInfo ci) {
         EventMotion event = new EventMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround);
-        event.setType(EventType.PRE);
-        Client.onEvent(event);
+event.setType(EventType.PRE);
+Client.onEvent(event);
+        boolean sprinting = isSprinting() ;
 
-        if (event.isModded()) {
-            ci.cancel();
-            sendMovePacket(event);
-            System.out.println("Move Modded!");
+        if (sprinting != serverSprintState) {
+            if (sprinting)
+                sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityPlayerSP) (Object) this, START_SPRINTING));
+            else sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityPlayerSP) (Object) this, STOP_SPRINTING));
+
+            serverSprintState = sprinting;
         }
+
+        boolean sneaking = isSneaking();
+
+        if (sneaking != serverSneakState  ) {
+            if (sneaking)
+                sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityPlayerSP) (Object) this, START_SNEAKING));
+            else sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityPlayerSP) (Object) this, STOP_SNEAKING));
+
+            serverSneakState = sneaking;
+        }
+
+        if (isCurrentViewEntity()) {
+            float yaw = rotationYaw;
+            float pitch = rotationPitch;
+
+            if (event.isModded()) {
+                yaw = event.getYaw();
+                pitch = event.getPitch();
+            }
+
+            double xDiff = posX - lastReportedPosX;
+            double yDiff = getEntityBoundingBox().minY - lastReportedPosY;
+            double zDiff = posZ - lastReportedPosZ;
+            double yawDiff = yaw - this.lastReportedYaw;
+            double pitchDiff = pitch - this.lastReportedPitch;
+            boolean moved = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff > 9.0E-4 || positionUpdateTicks >= 20;
+            boolean rotated = yawDiff != 0 || pitchDiff != 0;
+
+            if (ridingEntity == null) {
+                if (moved && rotated) {
+                    sendQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(posX, getEntityBoundingBox().minY, posZ, yaw, pitch, onGround));
+                } else if (moved) {
+                    sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, getEntityBoundingBox().minY, posZ, onGround));
+                } else if (rotated) {
+                    sendQueue.addToSendQueue(new C03PacketPlayer.C05PacketPlayerLook(yaw, pitch, onGround));
+                } else {
+                    sendQueue.addToSendQueue(new C03PacketPlayer(onGround));
+                }
+            } else {
+                sendQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(motionX, -999, motionZ, yaw, pitch, onGround));
+                moved = false;
+            }
+
+            ++positionUpdateTicks;
+
+            if (moved) {
+                lastReportedPosX = posX;
+                lastReportedPosY = getEntityBoundingBox().minY;
+                lastReportedPosZ = posZ;
+                positionUpdateTicks = 0;
+            }
+
+            if (rotated) {
+                this.lastReportedYaw = yaw;
+                this.lastReportedPitch = pitch;
+            }
+        }
+
+      EventMotion event2 = new EventMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround);
+        event2.setType(EventType.POST);
+        Client.onEvent(event2);
+
+        ci.cancel();
     }
 
     @Inject(method = "onUpdateWalkingPlayer", at = @At(value = "RETURN"), cancellable = true)
@@ -85,7 +161,7 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     }
 
 
-    @Inject(method = "onLivingUpdate",at = @At(value =  "HEAD"))
+    @Inject(method = "onLivingUpdate",at = @At(value =  "RETURN"))
     private void onLivingUpdate(CallbackInfo ci){
         if (this.isUsingItem() && !this.isRiding()) {
           if(ModuleManager.getModulebyClass(NoSlowdown.class).isEnable()) {
@@ -107,15 +183,14 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
         }
     }
     }
-
+    @Unique
     public void sendMovePacket(EventMotion event) {
         boolean flag = this.isSprinting();
-
         if (flag != this.serverSprintState) {
             if (flag) {
-                Minecraft.getMinecraft().getNetHandler().getNetworkManager().sendPacket(new C0BPacketEntityAction(this, C0BPacketEntityAction.Action.START_SPRINTING));
+                Minecraft.getMinecraft().getNetHandler().getNetworkManager().sendPacket(new C0BPacketEntityAction(mc.thePlayer, START_SPRINTING));
             } else {
-                Minecraft.getMinecraft().getNetHandler().getNetworkManager().sendPacket(new C0BPacketEntityAction(this, C0BPacketEntityAction.Action.STOP_SPRINTING));
+                Minecraft.getMinecraft().getNetHandler().getNetworkManager().sendPacket(new C0BPacketEntityAction(mc.thePlayer, STOP_SPRINTING));
             }
 
             this.serverSprintState = flag;
@@ -125,9 +200,9 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 
         if (flag1 != this.serverSneakState) {
             if (flag1) {
-                this.connection.sendPacket(new C0BPacketEntityAction(this, C0BPacketEntityAction.Action.START_SNEAKING));
+                this.connection.sendPacket(new C0BPacketEntityAction(mc.thePlayer, START_SNEAKING));
             } else {
-                this.connection.sendPacket(new C0BPacketEntityAction(this, C0BPacketEntityAction.Action.STOP_SNEAKING));
+                this.connection.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
             }
 
             this.serverSneakState = flag1;
@@ -143,7 +218,7 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
             boolean flag2 = d0 * d0 + d1 * d1 + d2 * d2 > 9.0E-4D || this.positionUpdateTicks >= 20;
             boolean flag3 = d3 != 0.0D || d4 != 0.0D;
 
-            if (this.isRiding()) {
+            if (mc.thePlayer.ridingEntity != null) {
                 this.connection.sendPacket(new C03PacketPlayer.C06PacketPlayerPosLook(this.motionX, -999.0D, this.motionZ, event.yaw, event.pitch, event.onGround));
                 flag2 = false;
             } else if (flag2 && flag3) {
@@ -172,4 +247,5 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
             this.prevOnGround = event.onGround;
         }
     }
+
 }

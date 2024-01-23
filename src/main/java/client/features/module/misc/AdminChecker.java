@@ -15,22 +15,18 @@ import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
 import client.ui.notifications.Notification;
-import client.ui.notifications.NotificationManager;
+import client.ui.notifications.NotificationPublisher;
 import client.ui.notifications.NotificationType;
 import client.utils.ChatUtils;
 import client.utils.ServerHelper;
 import client.utils.TimeHelper;
 import client.utils.font.CFontRenderer;
 import client.utils.font.Fonts;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C14PacketTabComplete;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.network.play.server.S3APacketTabComplete;
-import net.minecraft.util.BlockPos;
-import org.lwjgl.opengl.GL11;
 
 public class AdminChecker extends Module {
     private int lastAdmins;
@@ -47,7 +43,7 @@ public class AdminChecker extends Module {
     ModeSetting checkMode;
     NumberSetting scaling;
     BooleanSetting sound;
-    NumberSetting soundlong;
+    NumberSetting soundTime;
     private final TimeHelper timer3 = new TimeHelper();
     int i = 0;
     private String adminname;
@@ -63,9 +59,9 @@ public class AdminChecker extends Module {
         this.checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
         this.noticeMode = new ModeSetting("NoticeMode", "Display", new String[]{"Chat", "Display"});
         this.sound = new BooleanSetting("Sound", true);
-        this.soundlong = new NumberSetting("Sound Long", 50,10,200,1);
+        this.soundTime = new NumberSetting("Sound Time", 50,10,200,1);
         this.scaling = new NumberSetting("Size", 1.0F,1.0, 4.0, 2.0);;
-        addSetting(delay, checkMode,noticeMode,scaling, sound,soundlong); super.init();
+        addSetting(delay, checkMode,noticeMode,scaling, sound,soundTime); super.init();
 
     }
 
@@ -104,7 +100,7 @@ public class AdminChecker extends Module {
             if (!this.admins.isEmpty()) {
                 if(sound.enable) {
                     i++;
-                    if (i < soundlong.getValue()) {
+                    if (i < soundTime.getValue()) {
                                 mc.thePlayer.playSound("random.orb", 0.2F, 1.0F);
 
                     }
@@ -112,7 +108,6 @@ public class AdminChecker extends Module {
                 displayAdmins();
             } else{
                 i = 0;
-                NotificationManager.show(new Notification(NotificationType.WARNING, "No Admin INC", "0 admins", 1));
             }
         }
         if (e instanceof EventPacket) {
@@ -162,7 +157,6 @@ public class AdminChecker extends Module {
     }
 
     public void displayAdmins() {
-        NotificationManager.show(new Notification(NotificationType.WARNING, "Admin INC", String.valueOf(admins) , 1));
         if (timer2.hasReached(delay.value)) {
             if(noticeMode.getMode().equals("Chat")) {
                 ChatUtils.printChat(String.valueOf("Admin INC " + admins + " " + admins.size()));

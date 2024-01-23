@@ -74,21 +74,22 @@ public class KillAura extends Module {
                                 targets.remove(target);
                         }
                     }
-            if (e instanceof EventMotion) {
-                Entity target = findTarget();
-                EventMotion event = (EventMotion) e;
-                if (!targets.isEmpty()  ) {
 
-
-                    if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target ==null)
-                        return;
-                    float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
-                    event.setYaw(angles[0]);
-                    event.setPitch(angles[1]);
-
-                }
-            }
             super.onEvent(e);
+        }
+        if (e instanceof EventMotion) {
+            Entity target = findTarget();
+            EventMotion event = (EventMotion) e;
+            if (!targets.isEmpty()  ) {
+
+
+                if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target ==null)
+                    return;
+                float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                event.setYaw(angles[0]);
+                event.setPitch(angles[1]);
+
+            }
         }
 
     }

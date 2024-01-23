@@ -11,7 +11,9 @@
     "AccessorEntityPlayerSP",
     "AccessorMinecraft",
     "AccessorNetHandlerPlayClient",
+    "MixinEntity",
     "MixinEntityLivingBase",
+    "MixinEntityPlayer",
     "MixinEntityPlayerSP",
     "MixinEntityRenderer",
     "MixinGuiInGame",
@@ -21,11 +23,14 @@
     "MixinNetworkManager"
   ],
   "client": [
+    "MixinAbstractClientPlayer",
     "MixinGui",
     "MixinGuiButton",
     "MixinGuiMultiplayer",
     "MixinGuiScreen",
     "MixinGuiSlot",
-    "MixinGuiSpectator"
+    "MixinGuiSpectator",
+    "MixinRender",
+    "MixinRendererLivingEntity"
   ]
 }
