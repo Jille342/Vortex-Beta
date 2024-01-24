@@ -84,7 +84,7 @@ extendedReach = new NumberSetting("Extended Reach", 3,0, 4.0 ,0.1);
 
             for (Entity o : zz8) {
                 if (o.canBeCollidedWith()) {
-                    float ex = (float) ((double) o.getCollisionBorderSize() * HitBox.exp(o));
+                    float ex = (float) ((double) o.getCollisionBorderSize() * HitBoxes.size.getValue());
                     AxisAlignedBB zz13 = o.getEntityBoundingBox().expand(ex, ex, ex);
                     zz13 = zz13.expand(zzE, zzE, zzE);
                     MovingObjectPosition zz14 = zz13.calculateIntercept(eyes_positions, new_eyes_pos);

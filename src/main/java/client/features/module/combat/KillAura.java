@@ -7,6 +7,7 @@ import client.features.module.Module;
 import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
+import client.utils.RandomUtils;
 import client.utils.RotationUtils;
 import client.utils.ServerHelper;
 import client.utils.TimeHelper;
@@ -35,6 +36,10 @@ public class KillAura extends Module {
     NumberSetting rangeSetting;
     ModeSetting sortmode;
     BooleanSetting targetInvisibles;
+    ModeSetting rotationmode;
+    Entity lastTarget;
+    NumberSetting minrotationspeed;
+    NumberSetting maxrotationspeed;
     public KillAura() {
         super("KillAura", 0,	Category.COMBAT);
     }
@@ -46,13 +51,16 @@ public class KillAura extends Module {
         this.targetInvisibles = new BooleanSetting("Target Invisibles", true);
         this.targetAnimalsSetting = new BooleanSetting("Target Animals", false);
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
+        rotationmode = new ModeSetting("Rotation Mode", "Normal", new String[]{"Normal", "RotationSpeed"});
+        minrotationspeed = new NumberSetting("Min Rotation Speed", 50.0D, 1.0D, 180.0D, 1.0D);
+        maxrotationspeed = new NumberSetting("Max Rotation Speed", 60.0D, 1.0D, 180.0D, 1.0D);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
-        sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle"});
-        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting);
+        sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle", "HurtTime", "Armor"});
+        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed);
         super.init();
     }
 
-    ArrayList<Entity> targets = new ArrayList<Entity>();
+    ArrayList<EntityLivingBase> targets = new ArrayList<EntityLivingBase>();
     private final TimeHelper attackTimer = new TimeHelper();
 
     @Override
@@ -80,11 +88,21 @@ public class KillAura extends Module {
         if (e instanceof EventMotion) {
             Entity target = findTarget();
             EventMotion event = (EventMotion) e;
-            if (!targets.isEmpty()  ) {
-
-
+            if (!targets.isEmpty()   && target != null) {
                 if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target ==null)
                     return;
+                if(rotationmode.getMode().equals("RotationSpeed")) {
+                    float[] neededRotations = RotationUtils.getRotationsAAC((EntityLivingBase) target);
+                    float[] limited = RotationUtils.limitAngleChange(RotationUtils.serverRotations, neededRotations, RandomUtils.nextFloat((float) minrotationspeed.getValue(), (float) maxrotationspeed.getValue()));
+                    if (lastTarget != target) {
+                        limited[0] = limited[0] + RandomUtils.nextFloat(-7.0F, 7.0F);
+                        lastTarget = target;
+                    }
+                    RotationUtils.fixedSensitivity(limited, 0.1F);
+                    event.yaw = limited[0];
+                    event.pitch = limited[1];
+                }
+
                 float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
                 event.setYaw(angles[0]);
                 event.setPitch(angles[1]);
@@ -107,6 +125,9 @@ public class KillAura extends Module {
                 if (mc.thePlayer.getDistanceToEntity(entity) > focusRange) continue;
                 if (entity instanceof EntityPlayer) {
 
+
+                    if(AntiBot.isBot((EntityPlayer) entity))
+                        continue;
                     if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
                         continue;
                     }
@@ -126,7 +147,14 @@ public class KillAura extends Module {
                 this.targets.sort(Comparator.comparingDouble((entity) -> (double)mc.thePlayer.getDistanceToEntity((Entity) entity)));
                 break;
             case"Angle":
-                targets.sort(Comparator.comparingDouble(this::calculateYawChangeToDst));
+                this.targets.sort(Comparator.comparingDouble(this::calculateYawChangeToDst));
+                break;
+            case"HurtTime":
+                this.targets.sort(Comparator.comparingInt(o -> o.hurtTime));
+break;
+            case"Armor":
+                this.targets.sort(Comparator.comparingInt(o -> o.getTotalArmorValue()));
+break;
         }
         return (EntityLivingBase) targets.get(0);
     }

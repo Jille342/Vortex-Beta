@@ -3,26 +3,14 @@ package client.mixin.client;
 import client.Client;
 import client.event.listeners.EventCameraTransform;
 import client.event.listeners.EventRenderWorld;
-import client.features.module.Module;
-import client.features.module.ModuleManager;
-import client.features.module.combat.HitBox;
-import client.features.module.combat.Reach;
-import com.google.common.base.Predicates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.util.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Mixin(EntityRenderer.class)
 public abstract class MixinEntityRenderer {

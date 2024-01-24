@@ -37,6 +37,7 @@ public final class RotationUtils implements MCUtil {
     private RotationUtils() {}
     private static float serverYaw;
     private static float serverPitch;
+    public static float[] serverRotations = new float[2];
 
 
 
@@ -61,11 +62,26 @@ public final class RotationUtils implements MCUtil {
         }
         return MathHelper.wrapAngleTo180_float(-(Minecraft.getMinecraft().thePlayer.rotationYaw - (float) yawToEntity));
     }
+    public static void fixedSensitivity(float[] rotations, float sens) {
+        float f = sens * 0.6F + 0.2F;
+        float gcd = f * f * f * 1.2F;
+        rotations[0] = rotations[0] - rotations[0] % gcd;
+        rotations[1] = rotations[1] - rotations[1] % gcd;
+    }
       public static float fovToEntity(Entity ent) {
         double x = ent.posX - Minecraft.getMinecraft().thePlayer.posX;
         double z = ent.posZ - Minecraft.getMinecraft().thePlayer.posZ;
         double yaw = Math.atan2(x, z) * 57.2957795D;
         return (float) (yaw * -1.0D);
+    }
+    public static float[] limitAngleChange(float[] currentRotation, float[] targetRotation, float turnSpeed) {
+        float yawDifference = getAngleDifference(targetRotation[0], currentRotation[0]);
+        float pitchDifference = getAngleDifference(targetRotation[1], currentRotation[1]);
+        return new float[] { currentRotation[0] + ((yawDifference > turnSpeed) ? turnSpeed : Math.max(yawDifference, -turnSpeed)),
+                currentRotation[1] + ((pitchDifference > turnSpeed) ? turnSpeed : Math.max(pitchDifference, -turnSpeed)) };
+    }
+    private static float getAngleDifference(float a, float b) {
+        return ((a - b) % 360.0F + 540.0F) % 360.0F - 180.0F;
     }
     public static Vec3 getEyesPos()
     {
@@ -145,7 +161,20 @@ public final class RotationUtils implements MCUtil {
             return (float) MathHelper.wrapAngleTo180_double(-(mc.thePlayer.rotationYaw - Math.toDegrees(-Math.atan(diffX / diffZ))));
         }
     }
-
+    public static float[] getRotationsAAC(EntityLivingBase entity) {
+        float rotationPitch = RandomUtils.nextFloat(90.0F, 92.0F);
+        float rotationYaw = RandomUtils.nextFloat(rotationPitch, 94.0F);
+        double posX = entity.posX + (entity.posX - entity.lastTickPosX) * 1.45D - mc.thePlayer.posX - mc.thePlayer.motionX * 1.215D;
+        float rotationY2 = RandomUtils.nextFloat(175.0F, 180.0F);
+        float rotationY4 = RandomUtils.nextFloat(0.2F, 0.3F);
+        float rotationY3 = RandomUtils.nextFloat(rotationY4, 0.1F);
+        double posY = entity.posY + 1.45D - mc.thePlayer.posY + mc.thePlayer.getEyeHeight() + mc.thePlayer.getAge() + rotationY3;
+        double posZ = entity.posZ + (entity.posZ - entity.lastTickPosZ) * 1.215D - mc.thePlayer.posZ - mc.thePlayer.motionZ * 1.215D;
+        double var = Math.hypot(posX, posZ);
+        float yaw = (float)(Math.atan2(posZ, posX) * rotationY2 / Math.PI) - rotationYaw;
+        float pitch = (float)-(Math.atan2(posY, var) * rotationY2 / Math.PI);
+        return new float[] { yaw, pitch + 10.0F };
+    }
 
 
     public static Rotation calcRotationFromCoords(BlockPos orig, BlockPos dest) {

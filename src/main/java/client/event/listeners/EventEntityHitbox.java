@@ -1,7 +1,7 @@
 package client.event.listeners;
 
 import client.event.Event;
-import javafx.scene.chart.Axis;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 

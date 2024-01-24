@@ -148,7 +148,8 @@ public class AimAssist extends Module {
                 if (mc.thePlayer.getDistanceToEntity(entity) > focusRange) continue;
                 if (entity instanceof EntityPlayer) {
 
-                    if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
+                    if(AntiBot.isBot((EntityPlayer) entity))
+                     continue;                    if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
                         continue;
                     }
 

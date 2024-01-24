@@ -6,6 +6,7 @@ import client.event.Event;
 import client.event.listeners.EventPacket;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
+import client.features.module.ModuleManager;
 import client.setting.ModeSetting;
 import client.utils.ChatUtils;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -17,22 +18,28 @@ import net.minecraft.world.WorldSettings;
 public final class AntiBot extends Module {
 
     public AntiBot() {
-super("AntiBot",0, Category.COMBAT);
+        super("AntiBot", 0, Category.COMBAT);
     }
-ModeSetting mode;
+
+    static ModeSetting mode;
     Entity currentEntity;
     Entity[] playerList;
     int index;
     boolean next;
-       public static List<EntityPlayer> invalid = new ArrayList<>();
+    private static List<EntityPlayer> bots, removed;
+    public static List<EntityPlayer> invalid = new ArrayList<>();
+
     @Override
     public void init() {
         super.init();
-        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel","Mineplex", "Shotbow","Matrix"});
+        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel", "Mineplex", "Shotbow", "Matrix","ShotbowTeams"});
+        bots = new LinkedList<>();
+        removed = new LinkedList<>();
         addSetting(mode);
     }
+
     public void onEvent(Event<?> e) {
-        if(e instanceof EventUpdate) {
+        if (e instanceof EventUpdate) {
             setTag(mode.getMode());
             switch (mode.getMode()) {
                 case "Hypixel":
@@ -53,30 +60,18 @@ ModeSetting mode;
                     }
                     break;
                 case "Shotbow":
-                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                        if (entity instanceof EntityPlayer) {
-                            if (entity == mc.thePlayer)
-                                return;
-                            if (entity.ticksExisted < 100 && isNoArmor((EntityPlayer) entity)) {
-                                mc.theWorld.removeEntity(entity);
-                                ChatUtils.printChat("[AntiBot] Remove " + currentEntity.getName());
-                            }
 
-
-                        }
-
-                    }
                     break;
             }
         }
-        if(e instanceof EventPacket) {
+        if (e instanceof EventPacket) {
             if (e instanceof EventPacket) {
                 EventPacket event = ((EventPacket) e);
-                if(event.getPacket() instanceof S38PacketPlayerListItem) {
+                if (event.getPacket() instanceof S38PacketPlayerListItem) {
                     S38PacketPlayerListItem packet = (S38PacketPlayerListItem) event.getPacket();
                     S38PacketPlayerListItem.AddPlayerData data = packet.getEntries().get(0);
-                if(data.getGameMode() == WorldSettings.GameType.NOT_SET)
-                    event.cancel();
+                    if (data.getGameMode() == WorldSettings.GameType.NOT_SET)
+                        event.cancel();
                 }
             }
         }
@@ -102,14 +97,13 @@ ModeSetting mode;
                 return false;
             }
 
-            info = (NetworkPlayerInfo)var2.next();
-        } while(!info.getGameProfile().getName().equals(entity.getName()));
+            info = (NetworkPlayerInfo) var2.next();
+        } while (!info.getGameProfile().getName().equals(entity.getName()));
 
         return true;
     }
-    public static List<EntityPlayer> getInvalid() {
-        return invalid;
-    }
+
+
     private static boolean isNoArmor(final EntityPlayer entity) {
         for (int i = 0; i < 4; ++i) {
             if (entity.getEquipmentInSlot(i) != null) {
@@ -118,5 +112,20 @@ ModeSetting mode;
         }
         return true;
     }
+
+    public static boolean isBot(EntityPlayer entityPlayer) {
+        if (!(ModuleManager.getModulebyClass(AntiBot.class).isEnable()))
+            return false;
+        switch (mode.getMode()) {
+            case "Shotbow":
+                return entityPlayer.getHealth() - entityPlayer.getAbsorptionAmount() != 0.1f || mc.getNetHandler().getPlayerInfo(entityPlayer.getName()) == null;
+            case "Hypixel":
+                return entityPlayer.isInvisible();
+            case"ShotbowTeams":
+                return entityPlayer.getTeam()== null;
+        }
+        return bots.contains(entityPlayer);
+    }
+
 
 }

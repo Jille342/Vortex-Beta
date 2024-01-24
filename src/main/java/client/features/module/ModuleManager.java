@@ -51,16 +51,12 @@ public class ModuleManager {
    modules.add(new FastPlace());
    modules.add(new FastBreak());
    modules.add(new AdminChecker());
-   modules.add(new HitBox());
    modules.add(new Reach());
-   modules.add(new SameTeamRemover());
    modules.add(new NameTags());
    modules.add(new HitDelayFix());
    modules.add(new RightClicker());
-   modules.add(new DeadRemover());
-   modules.add(new HitBoxes2());
    modules.add(new FastBreak2());
-   modules.add(new TPBreaker2());
+   modules.add(new TPBreaker());
    modules.add(new Notifications());
    modules.add(new NoSwing());
    modules.add(new LegitAura());
@@ -68,8 +64,10 @@ public class ModuleManager {
    modules.add(new Chams());
    modules.add(new Freecam());
    modules.add(new AntiObbyTrap());
-   modules.add(new HitBoxes3());
-   modules.add(new HitBoxes4());
+   modules.add(new HitBoxes());
+   modules.add(new HitBoxes2());
+   modules.add(new KillAura2());
+   modules.add(new KillAura3());
 	}
 
 

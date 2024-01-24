@@ -7,11 +7,11 @@ import client.features.module.Module;
 import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
+import client.utils.RandomUtils;
 import client.utils.RotationUtils;
 import client.utils.ServerHelper;
 import client.utils.TimeHelper;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityIronGolem;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
 
-public class LegitAura extends Module {
+public class KillAura3 extends Module {
 
     NumberSetting CPS;
     BooleanSetting targetMonstersSetting;
@@ -36,30 +36,27 @@ public class LegitAura extends Module {
     NumberSetting rangeSetting;
     ModeSetting sortmode;
     BooleanSetting targetInvisibles;
-    NumberSetting fov;
-    BooleanSetting hitThroughWalls;
-    BooleanSetting clickOnly;
-    BooleanSetting notAimingOnly;
     ModeSetting rotationmode;
-    public LegitAura() {
-        super("LegitAura", 0,	Category.COMBAT);
+    Entity lastTarget;
+    NumberSetting minrotationspeed;
+    NumberSetting maxrotationspeed;
+    public KillAura3() {
+        super("KillAura3", 0,	Category.COMBAT);
     }
 
     @Override
     public void init() {
-        this.rangeSetting = new NumberSetting("Range", 3.0, 0, 4.2, 0.1);
+        this.rangeSetting = new NumberSetting("Range", 5.0, 3.0, 8.0, 0.1);
         this.targetMonstersSetting = new BooleanSetting("Target Monsters", true);
-        this.targetInvisibles = new BooleanSetting("Target Invisibles", false);
+        this.targetInvisibles = new BooleanSetting("Target Invisibles", true);
         this.targetAnimalsSetting = new BooleanSetting("Target Animals", false);
         this.ignoreTeamsSetting = new BooleanSetting("Ignore Teams", true);
+        rotationmode = new ModeSetting("Rotation Mode", "Normal", new String[]{"Normal", "RotationSpeed"});
+        minrotationspeed = new NumberSetting("Min Rotation Speed", 50.0D, 1.0D, 180.0D, 1.0D);
+        maxrotationspeed = new NumberSetting("Max Rotation Speed", 60.0D, 1.0D, 180.0D, 1.0D);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
-        sortmode = new ModeSetting("SortMode", "Angle", new String[]{"Distance", "Angle"});
-        rotationmode = new ModeSetting("Rotation Mode", "Normal", new String[]{"None", "Normal"});
-        this.fov = new NumberSetting("FOV", 20D, 0D, 360D, 1.0D);
-        hitThroughWalls = new BooleanSetting("Hit Through Walls", false);
-        clickOnly = new BooleanSetting("Click Only", true);
-        notAimingOnly = new BooleanSetting("Not Aiming Only", true);
-        addSetting(rotationmode,CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,fov,hitThroughWalls,rangeSetting,clickOnly, notAimingOnly);
+        sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle", "HurtTime", "Armor"});
+        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed);
         super.init();
     }
 
@@ -70,54 +67,49 @@ public class LegitAura extends Module {
     public void onEvent(Event<?> e) {
 
         if (e instanceof EventUpdate) {
-            Entity target = findTarget();
             setTag(sortmode.getMode() + " " + targets.size());
-            if (target != null) {
-                float diff = RotationUtils.calculateYawChangeToDst(target);
-                if (!mc.thePlayer.isUsingItem() && !(mc.currentScreen instanceof GuiInventory)) {
+            if (e.isPre()) {
 
-                    if (e.isPre()) {
-
-
-                        if (!targets.isEmpty()) {
-                            if (attackTimer.hasReached(calculateTime((int) CPS.value)) && !target.isDead && target.isEntityAlive()) {
-                                mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
-                                mc.thePlayer.swingItem();
-                                attackTimer.reset();
-                            }
-
-                            if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10)
-                                targets.remove(target);
-                        }
+                Entity target = findTarget();
+                if (!targets.isEmpty()) {
+                    if (attackTimer.hasReached(calculateTime((int) CPS.value)) && !target.isDead && target.isEntityAlive()) {
+                        mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                        mc.thePlayer.swingItem();
+                        attackTimer.reset();
                     }
 
-                    super.onEvent(e);
+                    if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10)
+                        targets.remove(target);
                 }
             }
+
+            super.onEvent(e);
         }
         if (e instanceof EventMotion) {
-
             Entity target = findTarget();
-            if (target != null) {
-                float diff = RotationUtils.calculateYawChangeToDst(target);
-                EventMotion event = (EventMotion) e;
-                if (!targets.isEmpty()) {
-                    if (!(diff < -6 || diff > 6) && notAimingOnly.enable)
-                        return;
-
-                    if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target == null)
-                        return;
-
-                    if (rotationmode.getMode().equals("Normal")) {
-                        float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
-                        event.setYaw(angles[0]);
-                        event.setPitch(angles[1]);
+            EventMotion event = (EventMotion) e;
+            if (!targets.isEmpty()   && target != null) {
+                if (target.isDead || !target.isEntityAlive() || target.ticksExisted < 10 && target ==null)
+                    return;
+                if(rotationmode.getMode().equals("RotationSpeed")) {
+                    float[] neededRotations = RotationUtils.getRotationsAAC((EntityLivingBase) target);
+                    float[] limited = RotationUtils.limitAngleChange(RotationUtils.serverRotations, neededRotations, RandomUtils.nextFloat((float) minrotationspeed.getValue(), (float) maxrotationspeed.getValue()));
+                    if (lastTarget != target) {
+                        limited[0] = limited[0] + RandomUtils.nextFloat(-7.0F, 7.0F);
+                        lastTarget = target;
                     }
-
+                    RotationUtils.fixedSensitivity(limited, 0.1F);
+                    event.yaw = limited[0];
+                    event.pitch = limited[1];
                 }
-            }
 
+                float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                event.setYaw(angles[0]);
+                event.setPitch(angles[1]);
+
+            }
         }
+
     }
     private EntityLivingBase findTarget() {
         targets.clear();
@@ -127,25 +119,18 @@ public class LegitAura extends Module {
                 if (entity.isDead || !entity.isEntityAlive() || entity.ticksExisted < 10) {
                     continue;
                 }
-                if(clickOnly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
-                    continue;
                 if (entity.isInvisible() && !targetInvisibles.enable)
                     continue;
-
-
-                if (!RotationUtils.fov(entity, fov.value))
-                    continue;
-                if(!mc.thePlayer.canEntityBeSeen(entity)&& !hitThroughWalls.isEnable())
-                    continue;
-                double focusRange = rangeSetting.value ;
+                double focusRange = mc.thePlayer.canEntityBeSeen(entity) ? rangeSetting.value : 3.5;
                 if (mc.thePlayer.getDistanceToEntity(entity) > focusRange) continue;
                 if (entity instanceof EntityPlayer) {
 
+
+                    if(AntiBot.isBot((EntityPlayer) entity))
+                        continue;
                     if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
                         continue;
                     }
-                    if(AntiBot.isBot((EntityPlayer) entity))
-                        continue;
 
                     targets.add((EntityLivingBase) entity);
                 } else if (entity instanceof EntityAnimal && targetAnimalsSetting.enable) {
@@ -162,9 +147,15 @@ public class LegitAura extends Module {
                 this.targets.sort(Comparator.comparingDouble((entity) -> (double)mc.thePlayer.getDistanceToEntity((Entity) entity)));
                 break;
             case"Angle":
-                targets.sort(Comparator.comparingDouble(this::calculateYawChangeToDst));
+                this.targets.sort(Comparator.comparingDouble(this::calculateYawChangeToDst));
+                break;
+            case"HurtTime":
+                this.targets.sort(Comparator.comparingInt(o -> o.hurtTime));
+                break;
+            case"Armor":
+                this.targets.sort(Comparator.comparingInt(o -> o.getTotalArmorValue()));
+                break;
         }
-        this.targets.sort(Comparator.comparingInt(o -> o.hurtTime));
         return (EntityLivingBase) targets.get(0);
     }
 

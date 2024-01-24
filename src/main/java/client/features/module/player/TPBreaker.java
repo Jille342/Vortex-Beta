@@ -4,38 +4,25 @@ import client.event.Event;
 import client.event.listeners.EventMotion;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
-import client.setting.BooleanSetting;
 import client.setting.ModeSetting;
 import client.setting.NumberSetting;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCake;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Blocks;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C07PacketPlayerDigging.Action;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0APacketAnimation;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.util.*;
-
-import org.lwjgl.opengl.GL11;
-
-import tv.twitch.chat.Chat;
 
 /**
  * Created by cool1 on 1/19/2017.
  */
-public class TPBreaker2 extends Module {
+public class TPBreaker extends Module {
 
     public static BlockPos blockBreaking;
     private double xPos, yPos, zPos, minx;
 
     ModeSetting mode;
     NumberSetting radius1;
-    public TPBreaker2() {
-        super("TPBreaker2", 0, Category.PLAYER);
+    public TPBreaker() {
+        super("TPBreaker", 0, Category.PLAYER);
     }
 
     @Override

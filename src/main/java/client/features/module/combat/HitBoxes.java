@@ -3,7 +3,6 @@
 package client.features.module.combat;
 
 import client.event.Event;
-import client.event.listeners.EventEntityHitbox;
 import client.event.listeners.EventUpdate;
 import client.features.module.Module;
 import client.setting.BooleanSetting;
@@ -19,7 +18,7 @@ import net.minecraft.entity.*;
 import java.util.*;
 import net.minecraft.util.*;
 
-public class HitBoxes3 extends Module
+public class HitBoxes extends Module
 {
     private MovingObjectPosition moving;
     private Entity pointedEntity;
@@ -37,8 +36,8 @@ public class HitBoxes3 extends Module
     private final List<EntityLivingBase> validated = new ArrayList<>();
 
 
-    public HitBoxes3() {
-        super("HitBoxes3", 0, Category.COMBAT);
+    public HitBoxes() {
+        super("HitBoxes", 0, Category.COMBAT);
     }
 
     public void init(){
@@ -66,8 +65,12 @@ public class HitBoxes3 extends Module
            if(entity != null)  {
                float width = entity.width;
                float height = entity.height;
-               float expandValue = (float) size.getValue();
-               entity.setEntityBoundingBox(new AxisAlignedBB(entity.posX - width - expandValue, entity.posY, entity.posZ + width + expandValue, entity.posX + width + expandValue, entity.posY + height + expandValue, entity.posZ - width - expandValue));
+               float expandValue = (float) size.getValue()-0.30F;
+               float ex = (float) ((double) entity.getCollisionBorderSize() + expandValue);
+               AxisAlignedBB ax = entity.getEntityBoundingBox().expand(ex, ex, ex);
+               entity.setEntityBoundingBox(new AxisAlignedBB(entity.posX - width - expandValue, entity.posY , entity.posZ + width + expandValue, entity.posX + width + expandValue, entity.posY + height , entity.posZ - width - expandValue));
+
+
            }
            }
 
@@ -95,6 +98,8 @@ public class HitBoxes3 extends Module
                     if (ignoreTeamsSetting.enable && ServerHelper.isTeammate((EntityPlayer) entity)) {
                         continue;
                     }
+                    if(AntiBot.isBot((EntityPlayer) entity))
+                        continue;
                     if(  ((EntityPlayer) entity).getHealth() ==0)
                         continue;
                     validated.add((EntityLivingBase) entity);
@@ -123,5 +128,6 @@ public class HitBoxes3 extends Module
 
         return validated.get(0);
     }
+
 
 }

@@ -16,7 +16,7 @@ public class Criticals extends Module {
     }
     public void init() {
         super.init();
-        mode = new ModeSetting("Mode", "ACP", new String[]{"Packet", "ACP"});
+        mode = new ModeSetting("Mode", "ACP", new String[]{"Packet", "ACP", "NCP"});
         addSetting(mode);
     }
 
@@ -27,7 +27,7 @@ public class Criticals extends Module {
 
         if (e instanceof EventPacket) {
             EventPacket event = ((EventPacket)e);
-            if(event.isIncoming()) {
+            if(event.isOutgoing()) {
                 if (event.getPacket() instanceof C02PacketUseEntity) {
                     C02PacketUseEntity packetUseEntity = (C02PacketUseEntity) event.getPacket();
                     if (packetUseEntity.getAction() == C02PacketUseEntity.Action.ATTACK  && mc.thePlayer.onGround) {
@@ -40,10 +40,20 @@ public class Criticals extends Module {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0625D, mc.thePlayer.posZ, false));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, false));
                                 break;
+                            case "NCP":
+                                double random = Math.random() * 0.0003;
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.06252F + random, mc.thePlayer.posZ, true));
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + random, mc.thePlayer.posZ, false));
+                                break;
 
                         }
                     }
                 }
+            }
+        }
+        if(e instanceof  EventUpdate) {
+         if(   e.isPre()) {
+
             }
         }
     }
