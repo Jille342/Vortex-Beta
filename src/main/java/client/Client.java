@@ -5,8 +5,6 @@ import client.event.listeners.EventChat;
 import client.event.Event;
 import client.event.listeners.EventPacket;
 import client.features.module.ModuleManager;
-import client.mixin.client.MixinGuiChest;
-import client.ui.HUD;
 import client.ui.HUD2;
 import client.ui.gui.clickGUI.GuiClickGUI;
 import client.ui.theme.ThemeManager;
@@ -16,14 +14,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import org.lwjgl.input.Keyboard;
-import scala.tools.nsc.doc.model.Public;
 
 import static client.Client.MOD_ID;
 import static client.Client.NAME;
@@ -35,25 +27,24 @@ public class Client
     public static final String NAME = "Moleculious";
     public static final String VERSION = "0.1 Beta";
 	public static HUD2 hud2 = new HUD2();
+	public static String username = null;
 
-	public static HUD hud = new HUD();
 
 	public static ThemeManager themeManager = new ThemeManager();
 	public static CommandManager commandManager = new CommandManager();
 	public static Minecraft mc = Minecraft.getMinecraft();
 	public static ResourceLocation background = new ResourceLocation("client/background.png");
 
-    public static void init()
-    {
-	//	MinecraftForge.EVENT_BUS.register(this);
+    public static void init() {
+
 		commandManager.init();
 		ModuleManager.registerModules();
 
 		ModuleManager.loadModuleSetting();
-		GuiClickGUI.loadModules();
+GuiClickGUI.loadModules();
 	}
 
-	public static Event<?> onEvent(Event<?> e) {
+        public static Event<?> onEvent(Event<?> e) {
 		if (e instanceof EventPacket) {
 			EventPacket event = (EventPacket)e;
 			Packet p = event.getPacket();

@@ -24,6 +24,7 @@ import client.utils.font.CFontRenderer;
 import client.utils.font.Fonts;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.network.play.client.C01PacketChatMessage;
 import net.minecraft.network.play.client.C14PacketTabComplete;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.network.play.server.S3APacketTabComplete;
@@ -44,6 +45,7 @@ public class AdminChecker extends Module {
     NumberSetting scaling;
     BooleanSetting sound;
     NumberSetting soundTime;
+    BooleanSetting autohub;
     private final TimeHelper timer3 = new TimeHelper();
     int i = 0;
     private String adminname;
@@ -59,9 +61,10 @@ public class AdminChecker extends Module {
         this.checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
         this.noticeMode = new ModeSetting("NoticeMode", "Display", new String[]{"Chat", "Display"});
         this.sound = new BooleanSetting("Sound", true);
+        autohub = new BooleanSetting("Auto Hub", true);
         this.soundTime = new NumberSetting("Sound Time", 50,10,200,1);
         this.scaling = new NumberSetting("Size", 1.0F,1.0, 4.0, 2.0);;
-        addSetting(delay, checkMode,noticeMode,scaling, sound,soundTime); super.init();
+        addSetting(delay, checkMode,noticeMode,scaling, sound,soundTime, autohub); super.init();
 
     }
 
@@ -98,8 +101,11 @@ public class AdminChecker extends Module {
             }
             setTag(String.valueOf(admins.size()));
             if (!this.admins.isEmpty()) {
+                i++;
+                if((i== 1) &&  autohub.enable) {
+                    mc.thePlayer.sendQueue.addToSendQueue(new C01PacketChatMessage("/hub"));
+                }
                 if(sound.enable) {
-                    i++;
                     if (i < soundTime.getValue()) {
                                 mc.thePlayer.playSound("random.orb", 0.2F, 1.0F);
 

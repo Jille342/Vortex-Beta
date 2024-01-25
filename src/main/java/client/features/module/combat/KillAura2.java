@@ -103,9 +103,11 @@ public class KillAura2 extends Module {
                     event.pitch = limited[1];
                 }
 
-                float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
-                event.setYaw(angles[0]);
-                event.setPitch(angles[1]);
+                if(rotationmode.getMode().equals("Normal")) {
+                    float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
+                    event.setYaw(angles[0]);
+                    event.setPitch(angles[1]);
+                }
 
             }
         }

@@ -1,5 +1,6 @@
 package client.ui;
 
+import client.Client;
 import client.features.module.Module;
 import client.features.module.ModuleManager;
 import client.ui.element.ElementManager;
@@ -9,6 +10,7 @@ import client.utils.Translate;
 import client.utils.font.CFontRenderer;
 import client.utils.font.Fonts;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.opengl.GL11;
@@ -72,7 +74,8 @@ public class HUD2 {
                 font.drawStringWithShadow(ping, 3, scaledResolution.getScaledHeight() - height - font.getHeight() - 2, -1);
             }
             font.drawStringWithShadow(build, 5, 16, -1);
-
+            if(Client.username != null)
+            font.drawStringWithShadow("User "+ Client.username, scaledResolution.getScaledWidth() -font.getStringWidth(build) - 6, scaledResolution.getScaledHeight() - height, -1);
             this.drawGaeHud();
         }
 

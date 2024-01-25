@@ -4,6 +4,8 @@ import client.Client;
 import client.event.listeners.EventRender2D;
 import client.features.module.ModuleManager;
 import client.features.module.render.HUD;
+import client.notifications.Notification;
+import client.notifications.NotificationManager;
 import client.ui.notifications.NotificationPublisher;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.ScaledResolution;
@@ -17,7 +19,7 @@ public class MixinGuiInGame {
 
     @Inject(method = "renderGameOverlay", at = @At("HEAD"))
     private void renderGameOverlay(float p_renderGameOverlay_1_, CallbackInfo ci) {
-        NotificationPublisher.publish();
+        NotificationManager.render();
         if(ModuleManager.getModulebyClass(HUD.class).enable) {
             Client.hud2.draw();
         }

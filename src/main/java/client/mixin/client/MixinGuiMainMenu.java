@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,6 +28,8 @@ import static net.minecraft.client.renderer.GlStateManager.disableLighting;
 
 @Mixin(GuiMainMenu.class)
 public class MixinGuiMainMenu extends GuiScreen {
+    @Shadow private String splashText;
+
     @Unique
 
     @Inject(method = "initGui", at = @At("RETURN"))
