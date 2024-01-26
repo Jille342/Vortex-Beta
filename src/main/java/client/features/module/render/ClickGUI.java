@@ -32,6 +32,8 @@ public class ClickGUI extends Module {
 		String[] modes = mode.toArray(new String[mode.size()]);
 		this.theme = new ModeSetting("Theme", mode.get(0), modes);
 		this.autoGuiScale = new BooleanSetting("AutoResize", true);
+		if(this.getKeyCode()== 0)
+			this.setKeyCode(Keyboard.KEY_RSHIFT);
 		addSetting(theme, autoGuiScale);
 		super.init();
 	}

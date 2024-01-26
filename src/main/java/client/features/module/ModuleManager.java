@@ -4,6 +4,7 @@ import client.event.Event;
 import client.event.listeners.EventKey;
 import client.features.module.combat.*;
 import client.features.module.misc.*;
+import client.features.module.movement.Flight;
 import client.features.module.movement.NoSlowdown;
 import client.features.module.movement.Speed;
 import client.features.module.movement.Sprint;
@@ -68,6 +69,7 @@ public class ModuleManager {
    modules.add(new HitBoxes2());
    modules.add(new KillAura2());
    modules.add(new KillAura3());
+   modules.add(new Flight());
 	}
 
 

@@ -11,6 +11,7 @@
     "AccessorEntityPlayerSP",
     "AccessorMinecraft",
     "AccessorNetHandlerPlayClient",
+    "MixinBlock",
     "MixinEntity",
     "MixinEntityLivingBase",
     "MixinEntityPlayer",

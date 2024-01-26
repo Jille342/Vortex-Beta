@@ -3,24 +3,17 @@ package client.mixin.client;
 import client.Client;
 import client.event.EventType;
 import client.event.listeners.EventMotion;
+import client.event.listeners.EventMove;
+import client.event.listeners.EventPushBlock;
 import client.event.listeners.EventUpdate;
 import client.features.module.ModuleManager;
 import client.features.module.movement.NoSlowdown;
 import client.features.module.render.NoSwing;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockFenceGate;
-import net.minecraft.block.BlockWall;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.*;
 import net.minecraft.util.*;
@@ -33,9 +26,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import scala.collection.parallel.ParIterableLike;
-
-import java.util.List;
 
 import static net.minecraft.network.play.client.C0BPacketEntityAction.Action.*;
 
@@ -158,6 +148,23 @@ Client.onEvent(event);
         EventMotion event = new EventMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround);
         event.setType(EventType.POST);
         Client.onEvent(event);
+    }
+    @Override
+    public void moveEntity(double x, double y, double z) {
+        final EventMove event = new EventMove(x, y, z);
+  Client.onEvent(event);
+        super.moveEntity(event.x, event.y, event.z);
+    }
+    @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
+    private void pushOutOfBlocks(CallbackInfoReturnable<Boolean> cir){
+        EventPushBlock event = new EventPushBlock();
+        Client.onEvent(event);
+        if (noClip) {
+            event.setCancelled(true);
+        }
+        if(event.isCancelled()) {
+           cir.setReturnValue(false);
+        }
     }
 
 
