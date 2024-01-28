@@ -75,8 +75,8 @@ public class KillAura extends Module {
 
         if (e instanceof EventUpdate) {
             setTag(sortmode.getMode() + " " + targets.size());
-            if(clickonly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
-                return;
+            Entity target = findTarget();
+
 
             if (e.isPre()) {
                 if(autodisable.enable) {
@@ -89,8 +89,10 @@ public class KillAura extends Module {
                         return;
                     }
                 }
+                if(clickonly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
+                    return;
 
-                Entity target = findTarget();
+
                         if (!targets.isEmpty()) {
                             if (attackTimer.hasReached(calculateTime((int) CPS.value)) && !target.isDead && target.isEntityAlive()) {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
