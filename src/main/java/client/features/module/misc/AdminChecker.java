@@ -61,10 +61,11 @@ public class AdminChecker extends Module {
         this.checkMode = new ModeSetting("Check Mode ", "Rank", new String[]{"Rank", "Tell"});
         this.noticeMode = new ModeSetting("NoticeMode", "Display", new String[]{"Chat", "Display"});
         this.sound = new BooleanSetting("Sound", true);
-        autohub = new BooleanSetting("Auto Hub", true);
+        this.autohub = new BooleanSetting("Auto Hub", true);
         this.soundTime = new NumberSetting("Sound Time", 50,10,200,1);
         this.scaling = new NumberSetting("Size", 1.0F,1.0, 4.0, 2.0);;
-        addSetting(delay, checkMode,noticeMode,scaling, sound,soundTime, autohub); super.init();
+        addSetting(delay, checkMode,noticeMode,scaling, sound, autohub, soundTime);
+        super.init();
 
     }
 

@@ -201,6 +201,8 @@ public class ModuleManager {
 								BooleanSetting bind = (BooleanSetting)m.settings.get(i-1);
 								if(val.equals("11"))
 								bind.setEnable(true);
+								if(val.equals("10"))
+								bind.setEnable(false);
 							}
 							if (val.startsWith("2")) {
 								ModeSetting bind = (ModeSetting)m.settings.get(i-1);
