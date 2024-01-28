@@ -42,6 +42,8 @@ public class KillAura extends Module {
     NumberSetting minrotationspeed;
     NumberSetting maxrotationspeed;
     BooleanSetting autodisable;
+    NumberSetting fov;
+    BooleanSetting clickonly;
     public KillAura() {
         super("KillAura", 0,	Category.COMBAT);
     }
@@ -57,9 +59,11 @@ public class KillAura extends Module {
         minrotationspeed = new NumberSetting("Min Rotation Speed", 50.0D, 1.0D, 180.0D, 1.0D);
         maxrotationspeed = new NumberSetting("Max Rotation Speed", 60.0D, 1.0D, 180.0D, 1.0D);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
+        this.fov = new NumberSetting("FOV", 20D, 0D, 360D, 1.0D);
         autodisable = new BooleanSetting("Auto Disable", true);
+        clickonly = new BooleanSetting("Click Only",false);
         sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle", "HurtTime", "Armor"});
-        addSetting(autodisable,CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed);
+        addSetting(clickonly,autodisable,CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed,fov);
         super.init();
     }
 
@@ -71,6 +75,9 @@ public class KillAura extends Module {
 
         if (e instanceof EventUpdate) {
             setTag(sortmode.getMode() + " " + targets.size());
+            if(clickonly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
+                return;
+
             if (e.isPre()) {
                 if(autodisable.enable) {
                     if ((!mc.thePlayer.isEntityAlive() || (mc.currentScreen != null && mc.currentScreen instanceof GuiGameOver))) {
@@ -99,6 +106,8 @@ public class KillAura extends Module {
             super.onEvent(e);
         }
         if (e instanceof EventMotion) {
+            if(clickonly.enable && !mc.gameSettings.keyBindAttack.isKeyDown())
+                return;
             Entity target = findTarget();
             EventMotion event = (EventMotion) e;
             if (!targets.isEmpty()   && target != null) {
@@ -133,6 +142,8 @@ public class KillAura extends Module {
                 if (entity.isDead || !entity.isEntityAlive() || entity.ticksExisted < 10) {
                     continue;
                 }
+                if (!RotationUtils.fov(entity, fov.value))
+                    continue;
                 if (entity.isInvisible() && !targetInvisibles.enable)
                     continue;
                 double focusRange = mc.thePlayer.canEntityBeSeen(entity) ? rangeSetting.value : 3.5;

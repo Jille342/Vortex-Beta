@@ -10,6 +10,7 @@ import client.utils.TimeHelper;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
@@ -31,7 +32,8 @@ public class RightClicker  extends  Module{
     public void init() {
         super.init();
         this.rightCPS = new NumberSetting("Right CPS", 7, 0, 20, 1f);
-        addSetting(rightCPS);
+        blocksonly = new BooleanSetting("Blocks Only", true);
+        addSetting(rightCPS,blocksonly);
     }
 
 
@@ -51,6 +53,14 @@ public class RightClicker  extends  Module{
         if (mc.isGamePaused() || !mc.inGameHasFocus) {
             return false;
         }
+        ItemStack item = mc.thePlayer.getHeldItem();
+        if(item != null) {
+            if (blocksonly.isEnable()) {
+                if (!(item.getItem() instanceof ItemBlock)) {
+                    return false;
+                }
+            }
+        }
 
         if (mc.thePlayer.getItemInUseCount() > 0) {
             return false;
@@ -60,19 +70,18 @@ public class RightClicker  extends  Module{
     }
     private void doRightClick() {
         int cps = (int) rightCPS.getValue();
-        if (clicked && mc.thePlayer.ticksExisted % RandomUtils.nextInt(1, 3) == 0) {
-            PlayerHelper.holdState(1, false);
-            clicked = false;
-            return;
-        }
+        if (timer.hasReached(calculateTime(cps))) {
+            timer.reset();
 
-        if (!timer.hasReached(calculateTime(cps))) {
-            return;
+            if (clicked && mc.thePlayer.ticksExisted % RandomUtils.nextInt(1, 3) == 0) {
+                PlayerHelper.holdState(1, false);
+                clicked = false;
+                return;
+            }
+            PlayerHelper.holdState(1, true);
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
+            KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
         }
-
-        PlayerHelper.holdState(1, true);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), true);
-        KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
     }
 }
 
