@@ -2,6 +2,7 @@ package client.ui.clicckgui2;
 
 import client.features.module.Module;
 import client.features.module.ModuleManager;
+import client.features.module.render.ClickGUI;
 import client.setting.*;
 import client.utils.font.CFontRenderer;
 import client.utils.font.Fonts;
@@ -205,6 +206,9 @@ public class ClickGuiWindow  {
                             keyBindSetting = ks;
                          clicked = true;
                         } else if(button == 1) {
+                            if(m instanceof ClickGUI) {
+                                ks.setKeyCode(Keyboard.KEY_RSHIFT);
+                            }
                          ks.setKeyCode(0);
                             keyCode = 0;
                             clicked = false;
@@ -235,5 +239,9 @@ public class ClickGuiWindow  {
     }
     public void onClose() {
         clicked = false;
+        Module m= new ClickGUI();
+     Setting s =    m.keyBindSetting;
+        if(Keyboard.getKeyName(((KeyBindSetting) s).getKeyCode()).toUpperCase() == "NONE")
+            ((KeyBindSetting) s).setKeyCode(Keyboard.KEY_RSHIFT);
     }
 }

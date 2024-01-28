@@ -6,6 +6,7 @@ import client.setting.KeyBindSetting;
 import client.setting.Setting;
 import client.utils.Translate;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.Arrays;

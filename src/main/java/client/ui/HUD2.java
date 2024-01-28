@@ -41,7 +41,7 @@ public class HUD2 {
         int color = -1;
         switch (namecolormode.getMode()) {
             case "Default":
-                color = new Color(9, 9, 79).getRGB();
+                color = new Color(50, 200, 255).getRGB();
                 break;
             case "Rainbow":
                 color = Colors.rainbow((counter[0] * 15) * 7, 0.8f, 1.0f);
@@ -110,7 +110,7 @@ public class HUD2 {
                 int color = -1;
                 switch (colormode.getMode()) {
                     case "Default":
-                        color = new Color(9, 9, 79).getRGB();
+                        color = new Color(50, 200, 255).getRGB();
                         break;
                     case "Rainbow":
                         color = Colors.rainbow((counter[0] * 15) * 7, 0.8f, 1.0f);

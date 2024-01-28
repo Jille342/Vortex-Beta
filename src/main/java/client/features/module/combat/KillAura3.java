@@ -12,6 +12,7 @@ import client.utils.RotationUtils;
 import client.utils.ServerHelper;
 import client.utils.TimeHelper;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiGameOver;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityIronGolem;
@@ -40,6 +41,7 @@ public class KillAura3 extends Module {
     Entity lastTarget;
     NumberSetting minrotationspeed;
     NumberSetting maxrotationspeed;
+    BooleanSetting autodisable;
     public KillAura3() {
         super("KillAura3", 0,	Category.COMBAT);
     }
@@ -55,8 +57,9 @@ public class KillAura3 extends Module {
         minrotationspeed = new NumberSetting("Min Rotation Speed", 50.0D, 1.0D, 180.0D, 1.0D);
         maxrotationspeed = new NumberSetting("Max Rotation Speed", 60.0D, 1.0D, 180.0D, 1.0D);
         this.CPS = new NumberSetting("CPS", 10, 0, 20, 1f);
+        autodisable = new BooleanSetting("Auto Disable", true);
         sortmode = new ModeSetting("SortMode", "Distance", new String[]{"Distance", "Angle", "HurtTime", "Armor"});
-        addSetting(CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed);
+        addSetting(autodisable,CPS, targetAnimalsSetting, targetMonstersSetting, ignoreTeamsSetting, sortmode, targetInvisibles,rangeSetting,rotationmode, minrotationspeed,maxrotationspeed);
         super.init();
     }
 
@@ -69,6 +72,16 @@ public class KillAura3 extends Module {
         if (e instanceof EventUpdate) {
             setTag(sortmode.getMode() + " " + targets.size());
             if (e.isPre()) {
+                if(autodisable.enable) {
+                    if ((!mc.thePlayer.isEntityAlive() || (mc.currentScreen != null && mc.currentScreen instanceof GuiGameOver))) {
+                        this.toggle();
+                        return;
+                    }
+                    if(mc.thePlayer.ticksExisted <= 1){
+                        this.toggle();
+                        return;
+                    }
+                }
 
                 Entity target = findTarget();
                 if (!targets.isEmpty()) {
@@ -102,7 +115,6 @@ public class KillAura3 extends Module {
                     event.yaw = limited[0];
                     event.pitch = limited[1];
                 }
-
                 if(rotationmode.getMode().equals("Normal")) {
                     float[] angles = RotationUtils.getRotationsEntity((EntityLivingBase) target);
                     event.setYaw(angles[0]);

@@ -1,10 +1,7 @@
 package client.features.module.player;
 
 import client.event.Event;
-import client.event.listeners.EventMotion;
-import client.event.listeners.EventPacket;
-import client.event.listeners.EventRender2D;
-import client.event.listeners.EventUpdate;
+import client.event.listeners.*;
 import client.features.module.Module;
 import client.setting.NumberSetting;
 import client.utils.MovementUtils;
@@ -39,12 +36,9 @@ public class Freecam extends Module {
     }
 
     public void onEvent(Event<?> event) {
-        if(event instanceof EventUpdate) {
-            double deltaTime = speed.getValue();
-            mc.thePlayer.setPositionAndRotation(mc.thePlayer.prevPosX+MovementUtils.InputX()*deltaTime, mc.thePlayer.prevPosY+MovementUtils.InputY()*deltaTime, mc.thePlayer.prevPosZ+MovementUtils.InputZ()*deltaTime, MathHelper.wrapAngleTo180_float(mc.thePlayer.prevRotationYaw), mc.thePlayer.prevRotationPitch);
-
-        }
-
+if(event instanceof EventUpdate) {
+    mc.thePlayer.noClip = true;
+}
 
 
         if(event instanceof EventPacket) {
@@ -74,6 +68,51 @@ public class Freecam extends Module {
                 }
 
             }
+        }
+
+        if (event instanceof EventMove) {
+            float speed1 = (float) speed.getValue();
+            EventMove em = (EventMove) event;
+            if (mc.thePlayer.movementInput.jump) {
+                em.setY(mc.thePlayer.motionY = speed1);
+            } else if (mc.thePlayer.movementInput.sneak) {
+                em.setY(mc.thePlayer.motionY = -speed1);
+            } else {
+                em.setY(mc.thePlayer.motionY = 0.0D);
+            }
+            speed1 = (float) Math.max(speed.getValue(), getBaseMoveSpeed());
+            double forward = mc.thePlayer.movementInput.moveForward;
+            double strafe = mc.thePlayer.movementInput.moveStrafe;
+            float yaw = mc.thePlayer.rotationYaw;
+            if ((forward == 0.0D) && (strafe == 0.0D)) {
+                em.setX(0.0D);
+                em.setZ(0.0D);
+            } else {
+                if (forward != 0.0D) {
+                    if (strafe > 0.0D) {
+                        strafe = 1;
+                        yaw += (forward > 0.0D ? -45 : 45);
+                    } else if (strafe < 0.0D) {
+                        yaw += (forward > 0.0D ? 45 : -45);
+                    }
+                    strafe = 0.0D;
+                    if (forward > 0.0D) {
+                        forward = 1;
+                    } else if (forward < 0.0D) {
+                        forward = -1;
+                    }
+                }
+                em.setX(forward * speed1 * Math.cos(Math.toRadians(yaw + 90.0F))
+                        + strafe * speed1 * Math.sin(Math.toRadians(yaw + 90.0F)));
+                em.setZ(forward * speed1 * Math.sin(Math.toRadians(yaw + 90.0F))
+                        - strafe * speed1 * Math.cos(Math.toRadians(yaw + 90.0F)));
+            }
+        }
+        if(event instanceof EventPushBlock) {
+            event.setCancelled(true);
+        }
+        if(event instanceof EventBlockBounds) {
+            event.setCancelled(true);
         }
     }
     public static double getBaseMoveSpeed() {
