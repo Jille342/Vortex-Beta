@@ -1,6 +1,7 @@
 package client.mixin.client;
 
 import client.Client;
+import client.event.listeners.EventClick;
 import client.event.listeners.EventKey;
 import client.event.listeners.EventTick;
 import client.features.module.ModuleManager;
@@ -29,6 +30,11 @@ public class MixinMinecraft {
     private void startGame(CallbackInfo callbackInfo) {
         Client.init();
 
+    }
+    @Inject(method = "clickMouse", at = @At("HEAD"))
+    private void clickMouse(CallbackInfo callbackInfo) {
+        EventClick event = new EventClick();
+        Client.onEvent(event);
     }
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;dispatchKeypresses()V", shift = At.Shift.AFTER))
     private void onKey(CallbackInfo ci) {

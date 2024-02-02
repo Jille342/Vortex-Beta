@@ -46,9 +46,9 @@ public class AdminChecker extends Module {
     BooleanSetting sound;
     NumberSetting soundTime;
     BooleanSetting autohub;
+    public static int lastAdminSize =0;
     private final TimeHelper timer3 = new TimeHelper();
     int i = 0;
-    private String adminname;
 
     public AdminChecker() {
         super("AdminChecker",  0, Category.MISC);
@@ -103,6 +103,10 @@ public class AdminChecker extends Module {
             setTag(String.valueOf(admins.size()));
             if (!this.admins.isEmpty()) {
                 i++;
+                if(lastAdminSize < admins.size()) {
+                    i= 0;
+                    lastAdminSize = admins.size();
+                }
                 if((i== 1) &&  autohub.enable) {
                     mc.thePlayer.sendQueue.addToSendQueue(new C01PacketChatMessage("/hub"));
                 }
@@ -114,6 +118,7 @@ public class AdminChecker extends Module {
                 }
                 displayAdmins();
             } else{
+                lastAdminSize = 0;
                 i = 0;
             }
         }
@@ -129,28 +134,29 @@ public class AdminChecker extends Module {
                     for (int length2 = (administrators = getAdministrators()).length, j = 0; j < length2; j++) {
                         String admin = administrators[j];
                         if (user.equalsIgnoreCase(admin)) {
-                            adminname = user;
                             displayAdmins();
                             this.admins.add(user);
                         }
                     }
                 }
                 this.lastAdmins = this.admins.size();
-            } else if (event.getPacket() instanceof S38PacketPlayerListItem) {
-                S38PacketPlayerListItem packetPlayInPlayerListItem = (S38PacketPlayerListItem) event.getPacket();
-                if (packetPlayInPlayerListItem.getAction() == S38PacketPlayerListItem.Action.UPDATE_LATENCY)
-                    for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayInPlayerListItem.getEntries()) {
-                        if (mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()) == null) {
-                            String name = getName(addPlayerData.getProfile().getId());
-                            if (Objects.isNull(name)) {
-                                checkList("NullPlayer");
-                                continue;
-                            }
-                            if (Arrays.toString((Object[]) getAdministrators()).contains(name))
-                                checkList(name);
-                        }
-                    }
             }
+
+            //else if (event.getPacket() instanceof S38PacketPlayerListItem) {
+         //       S38PacketPlayerListItem packetPlayInPlayerListItem = (S38PacketPlayerListItem) event.getPacket();
+           //     if (packetPlayInPlayerListItem.getAction() == S38PacketPlayerListItem.Action.UPDATE_LATENCY)
+             //       for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayInPlayerListItem.getEntries()) {
+               //         if (mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()) == null) {
+                 //           String name = getName(addPlayerData.getProfile().getId());
+                   //         if (Objects.isNull(name)) {
+                                //                checkList("NullPlayer");
+                    //            continue;
+                  //          }
+                //            if (Arrays.toString((Object[]) getAdministrators()).contains(name))
+              //                  checkList(name);
+            //            }
+          //          }
+        //    }
         }
     }
 

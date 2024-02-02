@@ -70,6 +70,9 @@ public class ModuleManager {
    modules.add(new KillAura2());
    modules.add(new KillAura3());
    modules.add(new Flight());
+   modules.add(new HitBoxesTest());
+   modules.add(new Test());
+   modules.add(new HitBoxesTest2());
 	}
 
 
