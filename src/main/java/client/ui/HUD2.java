@@ -17,8 +17,10 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.util.MathHelper;
 
 import java.awt.Color;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 
 import static client.features.module.render.HUD.*;
 
@@ -38,6 +40,7 @@ public class HUD2 {
 
     public void draw() {
         int[] counter = {1};
+        Date date = new Date();
         int color = -1;
         switch (namecolormode.getMode()) {
             case "Default":
@@ -56,13 +59,17 @@ public class HUD2 {
         ScaledResolution scaledResolution = new ScaledResolution(mc);
         float height = 10;
         String name = client.Client.NAME;
+        LocalTime localTime = LocalTime.now();
+        String time = String.valueOf(localTime);
         String fps = "FPS: \2477" + mc.getDebugFPS();
         String ping = "PING: \2477" + ((mc.getCurrentServerData() != null) ? mc.getCurrentServerData().pingToServer : 0);
         String coord = "XYZ: \2477" + MathHelper.floor_double(this.mc.thePlayer.posX) + " / " + MathHelper.floor_double(this.mc.thePlayer.posY) + " / " + MathHelper.floor_double(this.mc.thePlayer.posZ);String
                 build = "Build: \2477" + client.Client.VERSION;
       //  name = name.substring(0, 1).replaceAll(name.substring(0, 1), "\247c" + name.substring(0, 1)) + name.substring(1).replaceAll(name.substring(1), "\247f" + name.substring(1));
         name = name.substring(0, 1).replaceAll(name.substring(0, 1),  name.substring(0, 1)) + name.substring(1).replaceAll(name.substring(1), "\247f" + name.substring(1));
-
+        if(info2.enable){
+            name = name + " " +String.format("[%s] [%dFPS]", new Object[] { time.substring(0,5), Integer.valueOf(Minecraft.getDebugFPS()) });
+        }
         if (!mc.gameSettings.showDebugInfo) {
             font2.drawStringWithShadow(name, 3, 4, color);
             if (mc.currentScreen instanceof GuiChat) {

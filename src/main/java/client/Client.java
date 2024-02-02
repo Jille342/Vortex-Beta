@@ -33,7 +33,7 @@ public class Client
 	public static ThemeManager themeManager = new ThemeManager();
 	public static CommandManager commandManager = new CommandManager();
 	public static Minecraft mc = Minecraft.getMinecraft();
-	public static ResourceLocation background = new ResourceLocation("client/background.png");
+	public static ResourceLocation background = new ResourceLocation("client/bg1.jpg");
 
     public static void init() {
 

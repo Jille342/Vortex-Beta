@@ -17,6 +17,7 @@ public class HUD extends Module {
     public static BooleanSetting inversion;
     public static ModeSetting colormode;
     public static ModeSetting namecolormode;
+    public  static BooleanSetting info2;
 
     public static double lastPosX = Double.NaN;
     public static double lastPosZ = Double.NaN;
@@ -36,7 +37,8 @@ public class HUD extends Module {
         info = new BooleanSetting("Info", true);
         OUTLINE = new BooleanSetting("Outline", true);
         inversion = new BooleanSetting("Outline", true);
-        addSetting(info, OUTLINE, background, colormode, inversion, namecolormode);
+        info2 = new BooleanSetting("Info2", true);
+        addSetting(info, OUTLINE, background, colormode, inversion, namecolormode, info2);
     }
 
     @Override

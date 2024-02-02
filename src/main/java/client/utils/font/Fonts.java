@@ -14,6 +14,7 @@ public class Fonts implements MCUtil {
     public static CFontRenderer default18 = new CFontRenderer(getDefault(18), true, true);
     public static CFontRenderer default16 = new CFontRenderer(getDefault(16), true, true);
     public static CFontRenderer default15 = new CFontRenderer(getDefault(15), true, true);
+    public static CFontRenderer defaultTitle = new CFontRenderer(getDefault(50), true, true);
     public static CFontRenderer default13 = new CFontRenderer(getDefault(13), true, true);
     public static CFontRenderer default14 = new CFontRenderer(getDefault(14), true, true);
     public static CFontRenderer default12 = new CFontRenderer(getDefault(12), true, true);
