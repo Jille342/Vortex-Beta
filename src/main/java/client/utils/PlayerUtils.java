@@ -140,4 +140,22 @@ public final class PlayerUtils {
 
         return false;
     }
+    public static boolean isInsideBlock(EntityPlayer entity) {
+        for (int x = MathHelper.floor_double(entity.getEntityBoundingBox().minX); x < MathHelper.floor_double(entity.getEntityBoundingBox().maxX) + 1; x++) {
+            for (int y = MathHelper.floor_double(entity.getEntityBoundingBox().minY); y < MathHelper.floor_double(entity.getEntityBoundingBox().maxY) + 1; y++) {
+                for (int z = MathHelper.floor_double(entity.getEntityBoundingBox().minZ); z < MathHelper.floor_double(entity.getEntityBoundingBox().maxZ) + 1; z++) {
+                    Block block = mc.theWorld.getBlockState(new BlockPos(x, y, z)).getBlock();
+                    if (block != null && !(block instanceof net.minecraft.block.BlockAir)) {
+                        AxisAlignedBB boundingBox = block.getCollisionBoundingBox(mc.theWorld, new BlockPos(x, y, z), mc.theWorld.getBlockState(new BlockPos(x, y, z)));
+                        if (block instanceof net.minecraft.block.BlockHopper)
+                            boundingBox = new AxisAlignedBB(x, y, z, (x + 1), (y + 1), (z + 1));
+                        if (boundingBox != null &&
+                                entity.getEntityBoundingBox().intersectsWith(boundingBox))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

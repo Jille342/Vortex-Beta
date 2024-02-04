@@ -27,7 +27,7 @@ import java.util.Objects;
 public class InvMove extends Module {
     ModeSetting mode;
     boolean inInventory = false;
-    boolean Field2718;
+    boolean isClicked;
 
     public InvMove() {
         super("InvMove", 0, Category.PLAYER);
@@ -52,10 +52,10 @@ public class InvMove extends Module {
         }
         if (event instanceof EventTick) {
             KeyBinding[] moveKeys = new KeyBinding[]{mc.gameSettings.keyBindForward, mc.gameSettings.keyBindBack, mc.gameSettings.keyBindLeft, mc.gameSettings.keyBindRight, mc.gameSettings.keyBindSprint, mc.gameSettings.keyBindJump};
-            int var5;
+            int var5 = 0;
             int var6;
             KeyBinding var7;
-            byte var8;
+            byte var8 = 0;
             if (!this.mode.getMode().equals("Hypixel")) {
                 if (mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat)) {
                     for (KeyBinding bind : moveKeys){
@@ -79,13 +79,13 @@ public class InvMove extends Module {
                     var6 = var8 + 1;
             }
 
-            if (this.Field2718 && Objects.nonNull(mc.currentScreen)) {
-
+            if (this.isClicked && mc.currentScreen != null) {
                 for (KeyBinding bind : moveKeys){
-
+                    if(Keyboard.isKeyDown(bind.getKeyCode())) {
                         KeyBinding.setKeyBindState(bind.getKeyCode(), false);
-
+                    }
                 }
+
             } else {
                 if (mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat) && !(mc.currentScreen instanceof GuiChest) && !(mc.currentScreen instanceof GuiCrafting) && !(mc.currentScreen instanceof GuiFurnace) && !(mc.currentScreen instanceof GuiRepair) && !(mc.currentScreen instanceof GuiEditSign) && !(mc.currentScreen instanceof GuiEnchantment)) {
 
@@ -95,8 +95,8 @@ public class InvMove extends Module {
                     }
                 }
 
-                if (Objects.isNull(mc.currentScreen)) {
-                    this.Field2718 = false;
+                if (mc.currentScreen==null) {
+                    this.isClicked = false;
                     for (KeyBinding bind : moveKeys){
                         if(!Keyboard.isKeyDown(bind.getKeyCode())) {
                             KeyBinding.setKeyBindState(bind.getKeyCode(), false);
@@ -104,54 +104,44 @@ public class InvMove extends Module {
                     }
 
 
-
-                    for (KeyBinding bind : moveKeys){
-                        KeyBinding.setKeyBindState(bind.getKeyCode(), Keyboard.isKeyDown(bind.getKeyCode()));
-                    }
-
                 }
 
             }
         }
         if (event instanceof EventPacket) {
             EventPacket ep = (EventPacket) event;
-            Packet packet = ep.getPacket();
-            if (packet instanceof C0BPacketEntityAction) {
-                C0BPacketEntityAction p = (C0BPacketEntityAction) packet;
-                if (p.getAction() == Action.START_SPRINTING && inInventory && mode.getMode() == "AACP")
-                    ep.setCancelled(true);
-            }
+
             if (this.mode.getMode().equals("Hypixel")) {
-                Packet var2 = ep.getPacket();
-                if (event.isIncoming()) {
-                    if (var2 instanceof C0DPacketCloseWindow) {
+                Packet packet = ep.getPacket();
+                if (event.isOutgoing()) {
+                    if (packet instanceof C0DPacketCloseWindow) {
                         C0DPacketCloseWindow var3 = (C0DPacketCloseWindow) ep.getPacket();
-                        if (mc.currentScreen instanceof GuiInventory && !this.Field2718) {
+                        if (mc.currentScreen instanceof GuiInventory && this.isClicked) {
                             boolean var4 = true;
 
 
                             ep.setCancelled(true);
 
 
-                            this.Field2718 = false;
+                            this.isClicked = false;
                         }
                     }
 
-                        if (var2 instanceof C16PacketClientStatus) {
-                            C16PacketClientStatus var7 = (C16PacketClientStatus) var2;
-                            if (var7.getStatus() == EnumState.OPEN_INVENTORY_ACHIEVEMENT) {
+                        if (packet instanceof C16PacketClientStatus) {
+                            C16PacketClientStatus clientStatus = (C16PacketClientStatus) packet;
+                            if (clientStatus.getStatus() == EnumState.OPEN_INVENTORY_ACHIEVEMENT) {
                                 ep.setCancelled(true);
                             }
                         }
 
-                        if (var2 instanceof C0EPacketClickWindow) {
-                            C0EPacketClickWindow var8 = (C0EPacketClickWindow) ep.getPacket();
+                        if (packet instanceof C0EPacketClickWindow) {
+                            C0EPacketClickWindow clickWindow = (C0EPacketClickWindow) ep.getPacket();
                             if (mc.currentScreen instanceof GuiInventory) {
-                                if ((var8.getMode() == 4 || var8.getMode() == 3) && var8.getSlotId() == -999) {
+                                if ((clickWindow.getMode() == 4 || clickWindow.getMode() == 3) && clickWindow.getSlotId() == -999) {
                                     ep.setCancelled(true);
                                 } else {
                                     mc.thePlayer.sendQueue.addToSendQueue(new C16PacketClientStatus(EnumState.OPEN_INVENTORY_ACHIEVEMENT));
-                                    this.Field2718 = true;
+                                    this.isClicked = true;
                                 }
                             }
                         }

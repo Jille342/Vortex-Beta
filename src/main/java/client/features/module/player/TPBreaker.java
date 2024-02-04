@@ -32,7 +32,7 @@ public class TPBreaker extends Module {
     }
 
     public void init() {
-        mode = new ModeSetting("Mode", "RightClick", new String[]{ "Break", "RightClick"});
+        mode = new ModeSetting("Mode", "RightClick", new String[]{"RightClick"});
         this.radius1 = new NumberSetting("Radius", 5, 1, 10, 1f);
         addSetting(mode, radius1);
         super.init();
@@ -42,45 +42,7 @@ public class TPBreaker extends Module {
         if (event instanceof EventUpdate) {
             setTag(mode.getMode());
             EventUpdate em = (EventUpdate) event;
-            if(mode.getMode().equals("Break")){
-                if (em.isPre()) {
-                    for (int y = 6; y >= -6; --y) {
-                        for (int x = -6; x <= 6; ++x) {
-                            for (int z = -6; z <= 6; ++z) {
-                                boolean uwot = x != 0 || z != 0;
-                                if (mc.thePlayer.isSneaking()) {
-                                    uwot = !uwot;
-                                }
-                                if (uwot) {
-                                    BlockPos pos = new BlockPos(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
-                                    if (getFacingDirection(pos) != null && blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance() - 0.5) {
-                                        if (event instanceof EventMotion) {
-                                            EventMotion emm = (EventMotion) event;
-                                            float[] rotations = getBlockRotations(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
-                                            emm.setYaw(rotations[0]);
-                                            emm.setPitch(rotations[1]);
-                                        }
-                                        blockBreaking = pos;
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    blockBreaking = null;
-                } else {
-                    if (blockBreaking != null) {
-                        //mc.thePlayer.swingItem();
-                        EnumFacing direction = getFacingDirection(blockBreaking);
-                        if (direction != null) {
-                            if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem(), blockBreaking, direction, new Vec3(0, 0, 0))) {
-
-                                    mc.thePlayer.swingItem();
-                            }
-                        }
-                    }
-                }
-            }else if(mode.getMode().equals("RightClick")  && em.isPre()){
+           if(mode.getMode().equals("RightClick")  && em.isPre()){
                 int radius = (int) radius1.getValue();
                 for(int x = -radius; x < radius; x++){
                     for(int y = radius; y > -radius; y--){

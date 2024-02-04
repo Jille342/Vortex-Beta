@@ -9,7 +9,9 @@ import client.features.module.Module;
 
 import client.mixin.client.AccessorEntityPlayer;
 import client.setting.ModeSetting;
+import client.setting.NumberSetting;
 import client.utils.ClientUtils;
+import client.utils.MCUtil;
 import client.utils.MovementUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
@@ -24,11 +26,12 @@ public class Speed extends Module {
     }
 
     ModeSetting mode;
-
+    NumberSetting vanillaspeed;
     @Override
     public void init() {
-        this.mode = new ModeSetting("Mode", "NCP", new String[] {"NCP", "OldNCP",  "TEST"});
-        addSetting(mode);
+        this.mode = new ModeSetting("Mode", "NCP", new String[] {"NCP", "OldNCP",  "TEST", "VanillaHop"});
+        vanillaspeed = new NumberSetting("Vanilla Speed", 1.2, 0.9, 2.0, 0.1);
+        addSetting(mode,vanillaspeed);
         super.init();
     }
 
@@ -104,14 +107,30 @@ public class Speed extends Module {
                         mc.thePlayer.motionZ = 0.0D;
                     }
                     break;
+                case"VanillaHop":
+                    lastSpeed =vanillaspeed.getValue();
+                    //mc.thePlayer.motionY -= mc.thePlayer.motionY < .33319999363422365D ? 9.9999E-4D : 0;
+                        mc.thePlayer.motionY -= mc.thePlayer.motionY < .33319999363422365D ? 9.9999E-4D : 0;
+
+                    MovementUtils.Strafe(lastSpeed);
+                    if (!mc.thePlayer.onGround) {
+                    }else {
+
+                        if (MovementUtils.isMoving()) {
+                            mc.thePlayer.jump();
+                        }
+                    }
+                    break;
 
             }
         }
-
         if (e instanceof EventJump) {
-            lastSpeed = .32;
-            MovementUtils.Strafe(.29);
+            if(mode.getMode().equals("NCP") || mode.getMode().equals("OldNCP")) {
+                lastSpeed = .32;
+                MovementUtils.Strafe(.29);
+            }
         }
+
 
 
         if(e instanceof EventPlayerInput) {

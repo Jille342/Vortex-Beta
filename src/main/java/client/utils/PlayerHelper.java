@@ -26,6 +26,7 @@ public class PlayerHelper {
 
     public static void legitAttack() {
         Minecraft mc = Minecraft.getMinecraft();
+        mc.thePlayer.swingItem();
         if (mc.objectMouseOver == null || mc.thePlayer.isRiding()) {
             return;
         }
@@ -46,7 +47,7 @@ public class PlayerHelper {
                 mc.thePlayer.swingItem();
         }
 
-        mc.thePlayer.swingItem();
+
     }
 
 }

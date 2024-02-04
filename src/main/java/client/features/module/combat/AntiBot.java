@@ -8,12 +8,15 @@ import client.event.listeners.EventUpdate;
 import client.features.module.Module;
 import client.features.module.ModuleManager;
 import client.setting.ModeSetting;
+import client.setting.NumberSetting;
 import client.utils.ChatUtils;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.world.WorldSettings;
+
+import static client.utils.PlayerUtils.isInsideBlock;
 
 public final class AntiBot extends Module {
 
@@ -26,15 +29,14 @@ public final class AntiBot extends Module {
     Entity[] playerList;
     int index;
     boolean next;
+   public static NumberSetting matrixflyingmotiony;
     private static List<EntityPlayer> bots, removed;
     public static List<EntityPlayer> invalid = new ArrayList<>();
 
     @Override
     public void init() {
         super.init();
-        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel", "Mineplex", "Shotbow", "Matrix","ShotbowTeams"});
-        bots = new LinkedList<>();
-        removed = new LinkedList<>();
+        mode = new ModeSetting("Mode ", "Shotbow", new String[]{"Hypixel", "Mineplex", "Shotbow", "ShotbowTeams", "MatrixFlying"});
         addSetting(mode);
     }
 
@@ -123,8 +125,18 @@ public final class AntiBot extends Module {
                 return entityPlayer.isInvisible();
             case"ShotbowTeams":
                 return entityPlayer.getTeam()== null;
+            case"MatrixFlying":
+                return isFlying(entityPlayer);
         }
         return bots.contains(entityPlayer);
+    }
+    private static boolean isFlying(EntityPlayer entity) {
+        if (mc.theWorld.getCollidingBoundingBoxes((Entity)entity, entity.getEntityBoundingBox().offset(0.0D, -0.01D, 0.0D)).isEmpty()) {
+                return true;
+        } else if (isInsideBlock(entity)) {
+            return true;
+        }
+        return false;
     }
 
 

@@ -140,7 +140,8 @@ public class HitBoxesTest extends Module
                     continue;
                 if(((EntityLivingBase) entity).hurtTime > hurttime.getValue())
                     continue;
-
+if(!mc.thePlayer.canEntityBeSeen(entity))
+    continue;
                 double focusRange = mc.thePlayer.canEntityBeSeen(entity) ? rangeSetting.value : 3.5;
                 if (mc.thePlayer.getDistanceToEntity(entity) > focusRange) continue;
                 if (entity instanceof EntityPlayer) {

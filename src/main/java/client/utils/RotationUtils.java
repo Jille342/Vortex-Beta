@@ -17,6 +17,7 @@
 
 package client.utils;
 
+import com.sun.javafx.geom.Vec3d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -45,6 +46,15 @@ public final class RotationUtils implements MCUtil {
         fov = (fov * 0.5);
         double v = ((double)(Minecraft.getMinecraft().thePlayer.rotationYaw - fovToEntity(entity)) % 360.0D + 540.0D) % 360.0D - 180.0D;
         return v > 0.0D && v < fov || -fov < v && v < 0.0D;
+    }
+    public static float[] getNeededFacing(Vec3 target, Vec3 from) {
+        double diffX = target.xCoord - from.xCoord;
+        double diffY = target.yCoord - from.yCoord;
+        double diffZ = target.zCoord - from.zCoord;
+        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
+        float yaw = (float)Math.toDegrees(Math.atan2(diffZ, diffX)) - 90.0F;
+        float pitch = (float)-Math.toDegrees(Math.atan2(diffY, diffXZ));
+        return new float[] { MathHelper.wrapAngleTo180_float(yaw), MathHelper.wrapAngleTo180_float(pitch) };
     }
 
 

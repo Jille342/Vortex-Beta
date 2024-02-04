@@ -128,7 +128,7 @@ public class MovementUtils {
 
 	public static boolean isMoving() {
 		float moveForward = mc.thePlayer.moveForward;
-		float Strafing = mc.thePlayer.moveForward;
+		float Strafing = mc.thePlayer.moveStrafing;
 		return moveForward!=0||Strafing!=0;
 	}
 	public static float getBaseSpeed() {

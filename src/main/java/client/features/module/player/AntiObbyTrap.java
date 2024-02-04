@@ -19,7 +19,7 @@ import net.minecraft.util.EnumFacing;
 public class AntiObbyTrap extends Module {
     public BooleanSetting antisandtrap ;
     public BooleanSetting noswing ;
-    public static boolean Field2468 = false;
+    public static boolean isTrapped = false;
 
     public AntiObbyTrap() {
         super("AntiObbyTrap", 0, Category.PLAYER);
@@ -35,30 +35,30 @@ public class AntiObbyTrap extends Module {
         if(e instanceof EventMotion) {
             if (!e.isPost()) {
                 if (!ModuleManager.getModulebyClass(Freecam.class).isEnable()) {
-                    Field2468 = false;
+                    isTrapped = false;
                     Block var3 = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 1.0, mc.thePlayer.posZ)).getBlock();
-                    Block var4 = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)).getBlock();
+                    Block block = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)).getBlock();
                     Block var5 = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX + 1.0, mc.thePlayer.posY + 1.0, mc.thePlayer.posZ)).getBlock();
                     Block var6 = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX + 1.0, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock();
                     BlockPos var7 = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ);
                     BlockPos var8 = new BlockPos(mc.thePlayer.posX + 1.0, mc.thePlayer.posY + 1.0, mc.thePlayer.posZ);
                     BlockPos var9 = new BlockPos(mc.thePlayer.posX + 1.0, mc.thePlayer.posY, mc.thePlayer.posZ);
-                    if (var4 != Blocks.air && var4 != Blocks.bedrock && var4 != Blocks.obsidian && var3 == Blocks.obsidian && mc.thePlayer.hurtTime > 8) {
-                        Field2468 = true;
-                        this.sendBlockPos(var7, EnumFacing.DOWN);
+                    if (block != Blocks.air && block != Blocks.bedrock && block != Blocks.obsidian && var3 == Blocks.obsidian && mc.thePlayer.hurtTime > 8) {
+                        isTrapped = true;
+                        this.sendPacket(var7, EnumFacing.DOWN);
                     }
 
-                    if (var4 != Blocks.air && (var4 == Blocks.bedrock || var4 == Blocks.obsidian) && var3 == Blocks.obsidian && mc.thePlayer.hurtTime > 8) {
+                    if (block != Blocks.air && (block == Blocks.bedrock || block == Blocks.obsidian) && var3 == Blocks.obsidian && mc.thePlayer.hurtTime > 8) {
                         if (var6 != Blocks.air) {
-                            Field2468 = true;
-                            this.sendBlockPos(var9, EnumFacing.EAST);
+                            isTrapped = true;
+                            this.sendPacket(var9, EnumFacing.EAST);
                         }
 
                         if (var5 != Blocks.air) {
-                            Field2468 = true;
+                            isTrapped = true;
                             EventMotion event = (EventMotion) e;
                             event.setPitch(90.0F);
-                            this.sendBlockPos(var8, EnumFacing.UP);
+                            this.sendPacket(var8, EnumFacing.UP);
                         }
                     }
 
@@ -68,20 +68,20 @@ public class AntiObbyTrap extends Module {
         if(e instanceof  EventMotion) {
             if (!e.isPost()) {
                 if (!ModuleManager.getModulebyClass(Freecam.class).isEnable()) {
-                    Field2468 = false;
-                    BlockPos var2 = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
-                    Block var3 = mc.theWorld.getBlockState(var2.up()).getBlock();
+                    isTrapped = false;
+                    BlockPos blockpos = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
+                    Block var3 = mc.theWorld.getBlockState(blockpos.up()).getBlock();
                     if (var3 == Blocks.gravel || var3 == Blocks.sand) {
-                        var2 = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 1.0, mc.thePlayer.posZ);
+                        blockpos = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 1.0, mc.thePlayer.posZ);
                     }
 
-                    Block var4 = mc.theWorld.getBlockState(var2).getBlock();
-                    if (var4 == Blocks.gravel || var4 == Blocks.sand) {
-                        Field2468 = false;
+                    Block block = mc.theWorld.getBlockState(blockpos).getBlock();
+                    if (block == Blocks.gravel || block == Blocks.sand) {
+                        isTrapped = false;
                         if (this.antisandtrap.isEnable()) {
                             EventMotion event = (EventMotion) e;
                             event.setPitch(90.0F);
-                            this.sendBlockPos(var2, EnumFacing.UP);
+                            this.sendPacket(blockpos, EnumFacing.UP);
                         }
                     }
 
@@ -91,12 +91,14 @@ public class AntiObbyTrap extends Module {
     }
 
 
-    public void sendBlockPos(BlockPos blockPos, EnumFacing enumFacing) {
+    public void sendPacket(BlockPos blockPos, EnumFacing enumFacing) {
         if (this.noswing.isEnable()) {
            PacketUtils.sendPacket(new C0APacketAnimation());
+        } else {
+            mc.thePlayer.swingItem();
         }
 
-        mc.thePlayer.swingItem();
+
         PacketUtils.sendPacket(new C07PacketPlayerDigging(Action.START_DESTROY_BLOCK, blockPos, enumFacing));
         PacketUtils.sendPacket(new C07PacketPlayerDigging(Action.STOP_DESTROY_BLOCK,blockPos, enumFacing));
         PacketUtils.sendPacket(new C07PacketPlayerDigging(Action.START_DESTROY_BLOCK, blockPos, enumFacing));
