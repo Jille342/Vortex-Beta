@@ -75,6 +75,7 @@ public class ModuleManager {
    modules.add(new HitBoxesTest2());
    modules.add(new CivBreak());
    modules.add(new Debug());
+   modules.add(new Plugins());
 		System.out.println("Successfully loaded " + modules.size() + " modules.");
 	}
 

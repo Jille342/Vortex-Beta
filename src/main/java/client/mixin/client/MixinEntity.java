@@ -2,6 +2,8 @@ package client.mixin.client;
 
 import client.Client;
 import client.event.listeners.EventEntityHitbox;
+import client.features.module.ModuleManager;
+import client.features.module.player.Freecam;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +19,8 @@ public class MixinEntity {
     @Shadow private int fire;
     @Shadow private AxisAlignedBB boundingBox;
 
+    @Shadow public boolean noClip;
+
     @Inject(method = "moveEntity", at = @At(value =  "HEAD"), cancellable = true)
     public void moveEntity(double p_moveEntity_1_, double p_moveEntity_3_, double p_moveEntity_5_, CallbackInfo ci){
 
@@ -27,6 +31,13 @@ public class MixinEntity {
         Client.onEvent(eventEntityHitbox);
         cir.setReturnValue(eventEntityHitbox.getSize());
     }
+    @Inject(method = "isEntityInsideOpaqueBlock", at = @At("HEAD"), cancellable = true)
+    public void isEntityInside(CallbackInfoReturnable<Boolean> cir){
+        if (noClip || ModuleManager.getModulebyClass(Freecam.class).isEnable()) {
+            cir.setReturnValue(false);
+        }
+    }
+
     @Unique
     public int getFire() {
         return fire;

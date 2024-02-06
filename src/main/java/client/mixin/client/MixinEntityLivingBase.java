@@ -5,6 +5,8 @@ import client.event.EventType;
 import client.event.listeners.EventJump;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinEntityLivingBase extends MixinEntity {
 
     @Shadow protected abstract boolean isPlayer();
+
+    @Shadow public abstract boolean isPotionActive(int p_isPotionActive_1_);
+
+    @Shadow public abstract PotionEffect getActivePotionEffect(Potion p_getActivePotionEffect_1_);
 
     protected Minecraft mc = Minecraft.getMinecraft();
 

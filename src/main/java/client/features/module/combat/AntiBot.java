@@ -48,18 +48,6 @@ public final class AntiBot extends Module {
 
                     break;
                 case "Mineplex":
-                    Iterator var2 = mc.theWorld.getLoadedEntityList().iterator();
-
-                    while (var2.hasNext()) {
-                        Entity entity = (Entity) var2.next();
-                        if (entity instanceof EntityPlayer) {
-                            EntityPlayer bot = (EntityPlayer) entity;
-                            if (entity.ticksExisted < 2 && bot.getHealth() < 20.0F && bot.getHealth() > 0.0F && entity != mc.thePlayer) {
-                                mc.theWorld.removeEntity(entity);
-                                invalid.add((EntityPlayer) entity);
-                            }
-                        }
-                    }
                     break;
                 case "Shotbow":
 
@@ -128,7 +116,7 @@ public final class AntiBot extends Module {
             case"MatrixFlying":
                 return isFlying(entityPlayer);
         }
-        return bots.contains(entityPlayer);
+        return false;
     }
     private static boolean isFlying(EntityPlayer entity) {
         if (mc.theWorld.getCollidingBoundingBoxes((Entity)entity, entity.getEntityBoundingBox().offset(0.0D, -0.01D, 0.0D)).isEmpty()) {

@@ -17,7 +17,6 @@
 
 package client.utils;
 
-import com.sun.javafx.geom.Vec3d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;

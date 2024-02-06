@@ -5,19 +5,29 @@
  */
 package client.mixin.client;
 
+import client.Client;
+import client.event.listeners.EventBreakSlowdown;
 import client.mixin.client.MixinEntityLivingBase;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.FoodStats;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase{
 
     @Shadow
     public abstract ItemStack getHeldItem();
@@ -53,6 +63,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
     public InventoryPlayer inventory;
     private ItemStack cooldownStack;
     private int cooldownStackSlot;
+
 
 
 }

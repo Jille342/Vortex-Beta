@@ -162,6 +162,7 @@ if(event instanceof EventUpdate) {
             this.Field2739.setSneaking(mc.thePlayer.isSneaking());
             this.Field2739.onGround = mc.thePlayer.onGround;
             mc.theWorld.addEntityToWorld(this.Field2739.getEntityId(), this.Field2739);
+            mc.renderGlobal.loadRenderers();
             this.Field2741 = mc.thePlayer.posX;
             this.Field2742 = mc.thePlayer.posY;
             this.Field2743 = mc.thePlayer.posZ;

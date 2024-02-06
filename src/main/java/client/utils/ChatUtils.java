@@ -7,7 +7,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
 public class ChatUtils implements MCUtil {
-    public final static String chatPrefix = "\2477[\2476Ex\2477] \2478>> \247f";
+    public final static String chatPrefix = "\2477[\2476Mole\2477] \2478>> \247f";
     public final static String ircchatPrefix = "\2477[\2476Ex\2479IRC\2477] \247f";
 
     public static void printChat(String text) {
